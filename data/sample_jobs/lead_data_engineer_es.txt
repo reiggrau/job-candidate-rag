@@ -1,0 +1,21 @@
+Lead Data Engineer — Plataforma de Datos
+FinanceHub | Madrid (híbrido)
+
+Buscamos un Lead Data Engineer para liderar nuestro equipo de datos en Madrid.
+
+Responsabilidades:
+  · Liderar un equipo de 3–5 ingenieros de datos
+  · Diseñar y evolucionar nuestra plataforma de datos en la nube
+  · Migrar pipelines legacy a tecnologías modernas (dbt, Apache Beam)
+  · Colaborar con equipos de ML para garantizar la calidad del dato
+
+Qué buscamos:
+  · 7+ años de experiencia en ingeniería de datos
+  · Dominio de Python y SQL; Scala valorado
+  · Experiencia con GCP (BigQuery, Dataflow) o AWS (EMR, Glue)
+  · Conocimiento de Airflow y orquestación de pipelines
+  · Habilidades de liderazgo técnico y comunicación con stakeholders
+
+Seniority: Lead
+Sector: FinTech / Banca
+Presencial/Remoto: Híbrido Madrid

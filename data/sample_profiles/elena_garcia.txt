@@ -1,0 +1,28 @@
+Elena García
+Ingeniera de Software Senior | Madrid, España
+elena.garcia@email.com | github.com/egarcia
+
+EXPERIENCIA
+──────────────────────────────────────────
+Glovo — Senior Backend Engineer (2021–presente)
+  · Desarrollo y mantenimiento de microservicios en Python (FastAPI, Django)
+  · Arquitectura de eventos con Kafka y Redis
+  · Despliegues en AWS (ECS, RDS, S3, Lambda)
+  · Mentoring de 3 ingenieros junior
+
+Cabify — Backend Developer (2018–2021)
+  · APIs REST en Python y Node.js
+  · PostgreSQL, MongoDB
+  · CI/CD con Jenkins y Docker
+
+FORMACIÓN
+──────────────────────────────────────────
+Grado en Ingeniería Informática — Universidad Politécnica de Madrid, 2018
+
+HABILIDADES
+──────────────────────────────────────────
+Python, FastAPI, Django, Kafka, Redis, PostgreSQL, MongoDB,
+AWS, Docker, Kubernetes, Node.js
+
+IDIOMAS: Español (nativo), Inglés (C1)
+DISPONIBILIDAD REMOTA: Sí

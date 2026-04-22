@@ -243,6 +243,7 @@ pydantic-settings
 openai
 qdrant-client[fastembed]
 python-dotenv
+pdfplumber
 ```
 
 ---
@@ -363,6 +364,56 @@ Key points:
 - `SearchRequest.filters` is a free-form dict for now — Step 6 defines valid keys (e.g. `{"seniority": "senior", "location": "Barcelona"}`).
 - `MatchResult.score` comes from the LLM reranker in Step 7, not from vector distance. Vector distance ranks candidates; the LLM scores them on business fit.
 
+#### Few-shot examples (also in `models.py`)
+
+`models.py` also defines canonical example instances used to few-shot the LLM prompts in `normalizer.py`. They are defined as actual `NormalizedProfile` objects — not raw JSON strings — so they are structurally tied to the schema. If a field is added or renamed, Python raises a `TypeError` at import time rather than silently producing a malformed prompt.
+
+```python
+PROFILE_EXAMPLE_INPUT = """María López
+Desarrolladora Backend Senior | Barcelona
+10 años de experiencia en Python, Django y PostgreSQL.
+Actualmente en Glovo trabajando en microservicios con Kafka y Docker.
+Habla español e inglés. Máster en Informática, UPC 2014."""
+
+PROFILE_EXAMPLE_OUTPUT = NormalizedProfile(
+    name="María López",
+    summary=(
+        "Senior backend engineer with 10 years of experience developing Python-based "
+        "microservices and REST APIs, with deep expertise in Django, PostgreSQL, Kafka, "
+        "and Docker. Currently working in a high-scale food delivery environment. "
+        "Based in Barcelona, fluent in Spanish and English."
+    ),
+    current_role="Senior Backend Developer",
+    seniority="senior",
+    years_experience=10,
+    sector=["food delivery", "e-commerce"],
+    hard_skills=["Python", "Django", "PostgreSQL", "Kafka", "Docker"],
+    soft_skills=[],
+    languages=["Spanish", "English"],
+    location="Barcelona",
+    open_to_remote=False,
+    education="Master's in Computer Science, UPC, 2014",
+)
+```
+
+In `normalizer.py`, the example is rendered at import time via `.model_dump_json()` and prepended to the user message — never the system prompt, which is how the model is trained to interpret few-shot examples:
+
+```python
+_PROFILE_FEW_SHOT = (
+    f"--- EXAMPLE INPUT ---\n{PROFILE_EXAMPLE_INPUT}\n\n"
+    f"--- EXAMPLE OUTPUT ---\n{PROFILE_EXAMPLE_OUTPUT.model_dump_json(indent=2)}\n"
+    "--- END EXAMPLE ---\n\nNow extract from the following input:\n"
+)
+
+# Used in the LLM call:
+messages=[
+    {"role": "system", "content": PROFILE_SYSTEM_PROMPT},
+    {"role": "user",   "content": _PROFILE_FEW_SHOT + raw_text},
+]
+```
+
+The example is intentionally in **Spanish** — a different language from the English output — to specifically exercise the translation + normalization path, which is the hardest case.
+
 ---
 
 #### 2.3 — How they connect to the rest of the pipeline
@@ -384,21 +435,218 @@ models.py (NormalizedProfile, SearchRequest, MatchResult)
 
 ### Step 3 — `normalizer.py` ✅
 
-- `normalize_profile(raw_text)` and `normalize_job_description(raw_text)`
-- Both call OpenAI chat with `temperature=0` (deterministic extraction, not generation)
-- `response_format={"type": "json_object"}` guarantees parseable output
-- Summary always written in English — embeddings perform better in a single language space
-- Schema injected into prompt via `NormalizedProfile.model_json_schema()`
+#### 3.1 — What this module does and why
+
+Raw candidate profiles and job descriptions arrive in any format (plain text, JSON, PDF-extracted text) and any language. Before embedding or comparing them, everything must be converted to a **consistent, clean, English schema**.
+
+This module exposes two public functions:
+
+```python
+normalize_profile(raw_text: str)          → NormalizedProfile
+normalize_job_description(raw_text: str)  → NormalizedProfile
+```
+
+Both return the same `NormalizedProfile` type — the symmetric design means the rest of the pipeline doesn't need to know which side it's processing.
+
+---
+
+#### 3.2 — Why `temperature=0`
+
+This is **extraction**, not generation. There is a correct answer (what the CV or JD actually says) and you want it every time, not creative paraphrasing. `temperature=0` makes the model as deterministic as possible, which also means re-running normalization on the same input produces the same result — important for debugging and re-ingestion.
+
+---
+
+#### 3.3 — Why `response_format={"type": "json_object"}`
+
+Without this, the model may wrap its JSON in markdown fences (` ```json ... ``` `), add commentary, or produce malformed output. This parameter forces the model to output **only** a raw JSON object — no wrapper, no prose — which you can `json.loads()` directly.
+
+> `response_format` guarantees valid JSON syntax but not schema conformance. `NormalizedProfile.model_validate(data)` handles the schema check — if the model gets a type wrong or hallucinates a field, you get a clear `ValidationError` rather than a silent bad record.
+
+---
+
+#### 3.4 — Why inject the schema into the prompt
+
+Instead of describing the schema in prose (which drifts as `models.py` evolves), inject the live schema at module load time:
+
+```python
+import json
+from models import NormalizedProfile
+
+SCHEMA = json.dumps(NormalizedProfile.model_json_schema(), indent=2)
+```
+
+`model_json_schema()` returns a full JSON Schema object describing every field, its type, and whether it's required. Pasting this into the system prompt means the model sees exactly what you need — and if you add a field to `NormalizedProfile`, the prompt automatically reflects it on the next run.
+
+---
+
+#### 3.5 — Why impersonal third-person for the `summary` field
+
+Embedding models are sensitive to **register** (the "voice" of text). A first-person CV (`"I built distributed systems"`) and a second-person JD (`"candidate must have built distributed systems"`) describe the same thing but land in slightly different subspaces in the embedding space — not because the semantics differ, but because the linguistic style does.
+
+The standard fix for this is **HyDE** (Hypothetical Document Embeddings) — rewrite the JD as a hypothetical CV at query time, then embed that. It works but costs an extra LLM call per search.
+
+The approach here eliminates the need for HyDE entirely: both prompts instruct the model to write the `summary` in the **same impersonal third-person register**:
+
+```
+# Candidate prompt rule:
+- 'summary': write a dense, fluent English paragraph (4–6 sentences) in impersonal
+  third-person describing the candidate as a professional. Do NOT use first-person ("I",
+  "my") or second-person ("you", "your"). Frame it as a description of a person:
+  e.g. "Senior backend engineer with 7 years of experience building financial APIs in
+  Python and Go, with deep expertise in PostgreSQL and AWS, based in Barcelona."
+
+# JD prompt rule:
+- 'summary': write a dense, fluent English paragraph (4–6 sentences) in impersonal
+  third-person describing the ideal candidate as a professional. Do NOT use directives
+  ("must have", "we need", "you will") or second-person ("you", "your"). Frame it as
+  a description of a person, not a list of requirements.
+```
+
+Both sides produce summaries that sound like: *"Senior backend engineer with 7 years..."* — one describing who exists, the other describing who is wanted. Cosine similarity between them is a genuine semantic comparison, not a style-penalised one.
+
+---
+
+#### 3.6 — Few-shot prompting
+
+The model knows how to extract structured data, but one example dramatically improves consistency on the hardest cases: mixed-language inputs, missing fields, and getting the `summary` register exactly right.
+
+The examples are defined as actual `NormalizedProfile` instances in `models.py` (see Step 2) and rendered at import time via `.model_dump_json()`. This means:
+
+- A schema change that breaks the example raises a `TypeError` at import time, not silently at runtime
+- The example JSON is always in sync with the current schema — no manual maintenance
+
+```python
+# Rendered at import time — always reflects the current schema
+_PROFILE_FEW_SHOT = (
+    f"--- EXAMPLE INPUT ---\n{PROFILE_EXAMPLE_INPUT}\n\n"
+    f"--- EXAMPLE OUTPUT ---\n{PROFILE_EXAMPLE_OUTPUT.model_dump_json(indent=2)}\n"
+    "--- END EXAMPLE ---\n\nNow extract from the following input:\n"
+)
+```
+
+The example is injected into the **user message**, not the system prompt — this is how the model is trained to interpret few-shot examples (system prompt = instructions, user message = input context).
+
+---
+
+#### 3.7 — The full module structure
+
+```python
+# One private helper — the only thing that differs between
+# normalizing a profile vs. a JD is the system prompt and few-shot block.
+def _call_llm(system_prompt: str, few_shot: str, raw_text: str) -> NormalizedProfile:
+    response = client.chat.completions.create(
+        model=settings.llm_model,
+        temperature=0,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": few_shot + raw_text},
+        ],
+    )
+    data = json.loads(response.choices[0].message.content)
+    return NormalizedProfile.model_validate(data)
+
+# Two thin public wrappers
+def normalize_profile(raw_text: str) -> NormalizedProfile:
+    return _call_llm(PROFILE_SYSTEM_PROMPT, _PROFILE_FEW_SHOT, raw_text)
+
+def normalize_job_description(raw_text: str) -> NormalizedProfile:
+    return _call_llm(JD_SYSTEM_PROMPT, _JD_FEW_SHOT, raw_text)
+```
+
+---
+
+#### 3.8 — The `summary` field is the most important thing to get right
+
+This is the only field that gets embedded. The entire semantic search quality depends on it. Compare:
+
+**Bad** (generic, low information density):
+> "Experienced software engineer with strong technical skills and good communication. Has worked in multiple companies and knows several programming languages."
+
+**Good** (dense, embeddable, impersonal):
+> "Senior backend engineer with 7 years of experience building high-throughput financial APIs in Python and Go. Deep expertise in PostgreSQL, Redis, and Kafka. Has led teams of 4–6 in FinTech and RegTech environments in Barcelona and remotely."
+
+The prompt's `summary` instruction is the single most impactful thing to tune across the whole pipeline.
+
+
 
 ### Step 4 — Mock data ✅
 
-Sample files in `data/` covering:
+#### 4.1 — Purpose
 
-- `elena_garcia.txt` — Spanish, free-text CV, Senior Backend Engineer
-- `james_okafor.json` — English, structured JSON (LinkedIn-style), Lead Data Engineer
-- `carla_vidal.txt` — Spanish, narrative bio, Product Designer
-- `senior_backend_engineer.txt` — English job description, FinTech
-- `lead_data_engineer_es.txt` — Spanish job description, Madrid
+The ingestion pipeline needs realistic input to validate the normalizer, the embedding quality, and the end-to-end search. The samples are designed to stress-test specific parts of the pipeline:
+
+- **Mixed formats** — `.txt`, `.json`, and `.pdf` so `ingestion.py` must handle format detection
+- **Mixed languages** — Spanish and English to exercise the LLM's translation + normalization path
+- **Mixed profile types** — engineers and a designer to test sector/skill diversity and reranker penalty for irrelevant matches
+- **Matching JDs** — each JD is written to surface a specific candidate as the expected top result, giving a verifiable end-to-end test
+
+---
+
+#### 4.2 — Sample profiles (`data/sample_profiles/`)
+
+| File | Language | Format | Profile |
+|---|---|---|---|
+| `elena_garcia.txt` | Spanish | Free-text CV | Senior Backend Engineer, Madrid |
+| `james_okafor.json` | English | Structured JSON (LinkedIn-style) | Lead Data Engineer, London |
+| `carla_vidal.txt` | Spanish | Narrative bio | Senior Product Designer, Barcelona |
+| `guillem_reig.pdf` | English | PDF (real CV) | Full Stack AI Engineer, Barcelona |
+
+Example — `elena_garcia.txt` (Spanish, free-text, realistic mess):
+
+```
+Elena García
+Ingeniera de Software Senior | Madrid, España
+
+Glovo — Senior Backend Engineer (2021–presente)
+  · Microservicios en Python (FastAPI, Django), Kafka, Redis
+  · Despliegues en AWS (ECS, RDS, S3)
+
+Cabify — Backend Developer (2018–2021)
+  · APIs REST en Python y Node.js, PostgreSQL, MongoDB
+
+Habilidades: Python, FastAPI, Django, Kafka, Redis, PostgreSQL, AWS, Docker, Kubernetes
+Idiomas: Español (nativo), Inglés (C1) | Disponibilidad remota: Sí
+```
+
+The JSON profile (`james_okafor.json`) deliberately includes a first-person `summary` field — exactly what the normalizer's impersonal-register prompt is designed to correct.
+
+The PDF (`guillem_reig.pdf`) is a real CV included as an Easter egg for the live demo (see end-to-end test below).
+
+---
+
+#### 4.3 — Sample job descriptions (`data/sample_jobs/`)
+
+| File | Language | Format | Expected top match |
+|---|---|---|---|
+| `senior_backend_engineer.txt` | English | Plain text | Elena García |
+| `lead_data_engineer_es.txt` | Spanish | Plain text | James Okafor |
+| `ai_fullstack_engineer_laborful.json` | English | JSON | Guillem Reig |
+
+Example — `lead_data_engineer_es.txt` (Spanish JD, should surface an English-CV candidate):
+
+```
+Buscamos un Lead Data Engineer para nuestro equipo en Madrid.
+Requisitos: 7+ años con Spark, Python, Airflow.
+Experiencia con GCP (BigQuery, Dataflow) o AWS.
+Espa\u00f1ol fluido imprescindible.
+```
+
+This JD is intentionally in Spanish while James Okafor's profile is in English — a direct test that the normalizer's language-agnostic design works end-to-end.
+
+---
+
+#### 4.4 — End-to-end verification
+
+Once the full pipeline is running, expected rankings are:
+
+| JD | Expected #1 | Expected low score |
+|---|---|---|
+| `senior_backend_engineer.txt` | Elena García (Python, FastAPI, Kafka, AWS) | Carla Vidal (wrong sector entirely) |
+| `lead_data_engineer_es.txt` | James Okafor (Lead, GCP/BigQuery, Spark, dbt) | Carla Vidal |
+| `ai_fullstack_engineer_laborful.json` | Guillem Reig (React, TypeScript, Python, AWS, AI) | James Okafor (no AI/frontend overlap) |
+
+Carla appearing as a low scorer is intentional — she'll likely appear in the top-20 vector results (she's in the same embedding neighbourhood as tech professionals) but should be penalised by the LLM reranker for sector mismatch. This is a useful sanity check that the reranker is doing its job.
 
 ### Step 5 — `ingestion.py` (TODO)
 

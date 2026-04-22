@@ -1,0 +1,43 @@
+{
+	"full_name": "James Okafor",
+	"headline": "Lead Data Engineer | London",
+	"location": "London, UK",
+	"open_to_remote": true,
+	"summary": "I'm a lead data engineer with 9 years of experience building large-scale data platforms. I enjoy working at the intersection of data engineering and ML infrastructure.",
+	"experience": [
+		{
+			"company": "Revolut",
+			"title": "Lead Data Engineer",
+			"duration": "2020–present",
+			"description": "Leading a team of 5 data engineers. Built and maintain the company's core data platform on GCP (BigQuery, Dataflow, Pub/Sub). Migrated legacy ETL pipelines to Apache Beam and dbt."
+		},
+		{
+			"company": "King",
+			"title": "Senior Data Engineer",
+			"duration": "2016–2020",
+			"description": "Spark-based data pipelines on AWS EMR. Airflow orchestration. Python and Scala."
+		}
+	],
+	"education": [
+		{
+			"degree": "MSc Computer Science",
+			"institution": "University of Edinburgh",
+			"year": 2015
+		}
+	],
+	"skills": [
+		"Python",
+		"Scala",
+		"Apache Spark",
+		"Apache Beam",
+		"dbt",
+		"Airflow",
+		"BigQuery",
+		"GCP",
+		"AWS",
+		"Dataflow",
+		"Pub/Sub",
+		"SQL"
+	],
+	"languages": ["English", "Yoruba"]
+}

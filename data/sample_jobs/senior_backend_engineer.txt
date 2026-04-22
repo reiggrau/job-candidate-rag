@@ -1,0 +1,21 @@
+Senior Backend Engineer — FinTech Platform Team
+Workfully Payments | Barcelona (hybrid) or Remote
+
+We're building the infrastructure that processes millions of transactions
+per day. We need a Senior Backend Engineer to join our platform team.
+
+What you'll be working on:
+  · Design and build high-throughput REST and async APIs
+  · Own the reliability and observability of core payment services
+  · Collaborate with ML and data teams on event-driven pipelines
+
+What we're looking for:
+  · 5+ years of Python backend experience (FastAPI or Django preferred)
+  · Production experience with Kafka or a similar event streaming platform
+  · Solid understanding of PostgreSQL, query optimisation, and connection pooling
+  · Experience with AWS and containerised deployments (Docker, Kubernetes)
+  · Fluent English; Spanish is a plus
+
+Seniority: Senior
+Sector: FinTech
+Remote: Yes
