@@ -1,9 +1,6 @@
 # AI-Powered Job-to-Candidate Matching Demo
 
-Take-home technical challenge for Workfully — a Barcelona-based B2B recruitment marketplace.
 Demonstrates AI-powered matching between job descriptions and candidate profiles using a hybrid RAG pipeline.
-
-> **Note:** The same architecture applies to job-to-recruiter matching (the real product need). Only the data schema and sample data change — the pipeline logic is identical.
 
 ---
 
@@ -122,15 +119,18 @@ If you see `"For security reasons C:\ProgramData\DockerDesktop must be owned by 
 2. Open PowerShell **as Administrator**
 3. Navigate to the folder containing the installer
 4. Run:
+
 ```powershell
 Start-Process 'Docker Desktop Installer.exe' -Wait install
 ```
 
 **Windows Subsystem for Linux (WSL):**
 During installation you may be prompted to install WSL. Accept it — Docker Desktop on Windows runs containers inside a lightweight Linux VM via WSL2. Without it, Linux-based images (Python, Node, Qdrant) won't run. If you need to install it manually:
+
 ```powershell
 wsl --install
 ```
+
 Then restart your machine before continuing.
 
 ---
@@ -163,38 +163,38 @@ Defines three services that run together on a private Docker bridge network:
 
 ```yaml
 services:
-
   qdrant:
     image: qdrant/qdrant:latest
     ports:
-      - "6333:6333"   # REST API — used by qdrant-client in Python
-      - "6334:6334"   # gRPC — optional, but good to expose
+      - '6333:6333' # REST API — used by qdrant-client in Python
+      - '6334:6334' # gRPC — optional, but good to expose
     volumes:
-      - qdrant_data:/qdrant/storage  # persist indexed data
+      - qdrant_data:/qdrant/storage # persist indexed data
 
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      - '8000:8000'
     env_file:
-      - .env           # injects OPENAI_API_KEY etc. at runtime
+      - .env # injects OPENAI_API_KEY etc. at runtime
     depends_on:
       - qdrant
     environment:
-      - QDRANT_URL=http://qdrant:6333  # 'qdrant' resolves inside Docker network
+      - QDRANT_URL=http://qdrant:6333 # 'qdrant' resolves inside Docker network
 
   frontend:
     build: ./frontend
     ports:
-      - "5173:5173"
+      - '5173:5173'
     depends_on:
       - backend
 
 volumes:
-  qdrant_data:         # named volume — survives docker compose down
+  qdrant_data: # named volume — survives docker compose down
 ```
 
 Key points:
+
 - `depends_on` ensures Qdrant starts before the backend, backend before the frontend
 - The backend uses `http://qdrant:6333` (not `localhost`) because inside Docker, containers reach each other by **service name**
 - `env_file: .env` keeps secrets out of the compose file
@@ -312,6 +312,7 @@ settings = Settings()
 ```
 
 Key points:
+
 - `BaseSettings` maps env var names to fields automatically (case-insensitive). `OPENAI_API_KEY` in `.env` → `settings.openai_api_key`.
 - Fields with no default (e.g. `openai_api_key`) raise a `ValidationError` at startup if missing — fail fast, not silently.
 - Fields with defaults (e.g. `qdrant_url`) are safe to omit from `.env`, useful for local dev where Qdrant runs on `localhost` rather than the Docker service name.
@@ -358,6 +359,7 @@ class MatchResult(BaseModel):
 ```
 
 Key points:
+
 - `NormalizedProfile` is used for **both** candidates and job descriptions. When normalizing a JD, `name` is `None`. This symmetry means `normalizer.py`, `ingestion.py`, and `retrieval.py` all work with the same type.
 - `summary` is the field that gets embedded. It must be a dense, skill-rich English paragraph — not a JSON dump. The LLM normalization step (Step 3) is responsible for writing it well.
 - `hard_skills` stores **exact, canonical names** (`"PostgreSQL"`, not `"databases"`) because these feed the sparse BM25 index, which depends on term-level matching. Skill expansion (implied and similar skills) is handled separately in `skills.py` (see Step 5).
@@ -502,7 +504,7 @@ The approach here eliminates the need for HyDE entirely: both prompts instruct t
   a description of a person, not a list of requirements.
 ```
 
-Both sides produce summaries that sound like: *"Senior backend engineer with 7 years..."* — one describing who exists, the other describing who is wanted. Cosine similarity between them is a genuine semantic comparison, not a style-penalised one.
+Both sides produce summaries that sound like: _"Senior backend engineer with 7 years..."_ — one describing who exists, the other describing who is wanted. Cosine similarity between them is a genuine semantic comparison, not a style-penalised one.
 
 ---
 
@@ -561,14 +563,14 @@ def normalize_job_description(raw_text: str) -> NormalizedProfile:
 This is the only field that gets embedded. The entire semantic search quality depends on it. Compare:
 
 **Bad** (generic, low information density):
+
 > "Experienced software engineer with strong technical skills and good communication. Has worked in multiple companies and knows several programming languages."
 
 **Good** (dense, embeddable, impersonal):
+
 > "Senior backend engineer with 7 years of experience building high-throughput financial APIs in Python and Go. Deep expertise in PostgreSQL, Redis, and Kafka. Has led teams of 4–6 in FinTech and RegTech environments in Barcelona and remotely."
 
 The prompt's `summary` instruction is the single most impactful thing to tune across the whole pipeline.
-
-
 
 ### Step 4 — Mock data ✅
 
@@ -585,12 +587,12 @@ The ingestion pipeline needs realistic input to validate the normalizer, the emb
 
 #### 4.2 — Sample profiles (`data/sample_profiles/`)
 
-| File | Language | Format | Profile |
-|---|---|---|---|
-| `elena_garcia.txt` | Spanish | Free-text CV | Senior Backend Engineer, Madrid |
-| `james_okafor.json` | English | Structured JSON (LinkedIn-style) | Lead Data Engineer, London |
-| `carla_vidal.txt` | Spanish | Narrative bio | Senior Product Designer, Barcelona |
-| `guillem_reig.pdf` | English | PDF (real CV) | Full Stack AI Engineer, Barcelona |
+| File                | Language | Format                           | Profile                            |
+| ------------------- | -------- | -------------------------------- | ---------------------------------- |
+| `elena_garcia.txt`  | Spanish  | Free-text CV                     | Senior Backend Engineer, Madrid    |
+| `james_okafor.json` | English  | Structured JSON (LinkedIn-style) | Lead Data Engineer, London         |
+| `carla_vidal.txt`   | Spanish  | Narrative bio                    | Senior Product Designer, Barcelona |
+| `guillem_reig.pdf`  | English  | PDF (real CV)                    | Full Stack AI Engineer, Barcelona  |
 
 Example — `elena_garcia.txt` (Spanish, free-text, realistic mess):
 
@@ -617,11 +619,11 @@ The PDF (`guillem_reig.pdf`) is a real CV included as an Easter egg for the live
 
 #### 4.3 — Sample job descriptions (`data/sample_jobs/`)
 
-| File | Language | Format | Expected top match |
-|---|---|---|---|
-| `senior_backend_engineer.txt` | English | Plain text | Elena García |
-| `lead_data_engineer_es.txt` | Spanish | Plain text | James Okafor |
-| `ai_fullstack_engineer_laborful.json` | English | JSON | Guillem Reig |
+| File                                  | Language | Format     | Expected top match |
+| ------------------------------------- | -------- | ---------- | ------------------ |
+| `senior_backend_engineer.txt`         | English  | Plain text | Elena García       |
+| `lead_data_engineer_es.txt`           | Spanish  | Plain text | James Okafor       |
+| `ai_fullstack_engineer_laborful.json` | English  | JSON       | Guillem Reig       |
 
 Example — `lead_data_engineer_es.txt` (Spanish JD, should surface an English-CV candidate):
 
@@ -640,21 +642,179 @@ This JD is intentionally in Spanish while James Okafor's profile is in English �
 
 Once the full pipeline is running, expected rankings are:
 
-| JD | Expected #1 | Expected low score |
-|---|---|---|
-| `senior_backend_engineer.txt` | Elena García (Python, FastAPI, Kafka, AWS) | Carla Vidal (wrong sector entirely) |
-| `lead_data_engineer_es.txt` | James Okafor (Lead, GCP/BigQuery, Spark, dbt) | Carla Vidal |
+| JD                                    | Expected #1                                       | Expected low score                    |
+| ------------------------------------- | ------------------------------------------------- | ------------------------------------- |
+| `senior_backend_engineer.txt`         | Elena García (Python, FastAPI, Kafka, AWS)        | Carla Vidal (wrong sector entirely)   |
+| `lead_data_engineer_es.txt`           | James Okafor (Lead, GCP/BigQuery, Spark, dbt)     | Carla Vidal                           |
 | `ai_fullstack_engineer_laborful.json` | Guillem Reig (React, TypeScript, Python, AWS, AI) | James Okafor (no AI/frontend overlap) |
 
 Carla appearing as a low scorer is intentional — she'll likely appear in the top-20 vector results (she's in the same embedding neighbourhood as tech professionals) but should be penalised by the LLM reranker for sector mismatch. This is a useful sanity check that the reranker is doing its job.
 
-### Step 5 — `ingestion.py` (TODO)
+### Step 5 — `ingestion.py` ✅
 
-- Load files from `data/sample_profiles/`
-- Call `normalize_profile()` for each
-- Embed `profile.summary` with `text-embedding-3-large`
-- Extract sparse keywords from `hard_skills + [current_role]`
-- Upsert into Qdrant with dense vector, sparse vector, and metadata payload
+#### 5.1 — What this module does
+
+Ingestion is a one-shot pipeline that runs once at setup and again whenever new profiles are added. It has four sequential responsibilities:
+
+```
+File on disk
+  └─► load_raw_text()       — format detection, extract plain text string
+  └─► normalize_profile()   — LLM call → NormalizedProfile
+  └─► embed + expand        — dense vector (summary) + weighted sparse keywords
+  └─► upsert to Qdrant      — store vectors + metadata payload
+```
+
+Each step is independent and can be tested in isolation.
+
+---
+
+#### 5.2 — Format detection: `load_raw_text()`
+
+The normalizer knows nothing about file formats — it receives a plain string. `load_raw_text()` is the only place that knows about `.txt`, `.json`, and `.pdf`:
+
+```python
+def load_raw_text(path: Path) -> str:
+    if path.suffix == ".pdf":
+        with pdfplumber.open(path) as pdf:
+            return "\n".join(page.extract_text() or "" for page in pdf.pages)
+    elif path.suffix == ".json":
+        # Re-serialise to normalised string — consistent whitespace regardless of source
+        return json.dumps(json.loads(path.read_text(encoding="utf-8")), indent=2)
+    else:
+        return path.read_text(encoding="utf-8")
+```
+
+The `.json` branch deserialises and re-serialises rather than reading the raw string — this normalises inconsistent whitespace and key ordering before it reaches the LLM.
+
+---
+
+#### 5.3 — Embedding the summary: `embed()`
+
+Only `profile.summary` is embedded — not the full profile JSON. That one dense, information-rich paragraph is the entire basis for semantic search.
+
+```python
+def embed(text: str) -> list[float]:
+    response = client.embeddings.create(
+        model=settings.embedding_model,   # text-embedding-3-large
+        input=text,
+    )
+    return response.data[0].embedding    # 3072-dimensional float list
+```
+
+`text-embedding-3-large` returns 3072 dimensions by default. You can pass `dimensions=1536` to halve storage with minimal quality loss, but use full 3072 for a demo.
+
+---
+
+#### 5.4 — Building the sparse vector: `build_sparse_vector()`
+
+Qdrant sparse vectors are maps of `{ term_index → float weight }`. The index must be consistent between ingestion and query time — the same term must always map to the same integer.
+
+Rather than maintaining a vocabulary file, a stable MD5 hash provides deterministic, collision-resistant indices with no state:
+
+```python
+def term_to_index(term: str) -> int:
+    """Stable integer index for a term — consistent across runs."""
+    return int(hashlib.md5(term.lower().encode()).hexdigest(), 16) % (2**24)
+```
+
+The sparse vector is built from the weighted skill expansion (see `skills.py`):
+
+```python
+def build_sparse_vector(profile: NormalizedProfile) -> SparseVector:
+    weighted = expand_skills_weighted(
+        profile.hard_skills + [profile.current_role]
+    )  # e.g. {"React": 1.0, "JavaScript": 1.0, "Vue": 0.6, "Angular": 0.5}
+    indices = [term_to_index(term) for term in weighted]
+    values  = [float(weight) for weight in weighted.values()]
+    return SparseVector(indices=indices, values=values)
+```
+
+Exact skills get weight `1.0`, implied skills `1.0`, and similar-but-not-identical skills a partial weight (e.g. `0.6` for React→Vue). This makes the BM25 dot product naturally discount transferable-but-not-exact matches.
+
+---
+
+#### 5.5 — Creating the Qdrant collection: `ensure_collection()`
+
+The collection needs two vector spaces — `dense` (cosine similarity, 3072 dims) and `sparse` (dot product for BM25):
+
+```python
+def ensure_collection() -> None:
+    existing = [c.name for c in qdrant.get_collections().collections]
+    if settings.qdrant_collection not in existing:
+        qdrant.create_collection(
+            collection_name=settings.qdrant_collection,
+            vectors_config={
+                "dense": VectorParams(size=3072, distance=Distance.COSINE),
+            },
+            sparse_vectors_config={
+                "sparse": SparseVectorParams(),
+            },
+        )
+```
+
+Idempotent — safe to call on every ingestion run.
+
+---
+
+#### 5.6 — Upserting a profile: `upsert_profile()`
+
+Each candidate is stored as a Qdrant **point** with both vectors and a metadata payload:
+
+```python
+def upsert_profile(profile: NormalizedProfile, candidate_id: str) -> None:
+    dense_vector  = embed(profile.summary)
+    sparse_vector = build_sparse_vector(profile)
+
+    qdrant.upsert(
+        collection_name=settings.qdrant_collection,
+        points=[
+            PointStruct(
+                id=candidate_id,
+                vector={"dense": dense_vector, "sparse": sparse_vector},
+                payload={
+                    "name":             profile.name,
+                    "current_role":     profile.current_role,
+                    "seniority":        profile.seniority,
+                    "years_experience": profile.years_experience,
+                    "sector":           profile.sector,
+                    "hard_skills":      profile.hard_skills,
+                    "languages":        profile.languages,
+                    "location":         profile.location,
+                    "open_to_remote":   profile.open_to_remote,
+                    "summary":          profile.summary,   # stored for reranker
+                },
+            )
+        ],
+    )
+```
+
+`summary` is stored in the payload (not just embedded) so the reranker in Step 7 can read the actual text without going back to disk.
+
+---
+
+#### 5.7 — The top-level entry point: `ingest_all()`
+
+```python
+def ingest_all() -> None:
+    ensure_collection()
+    for path in PROFILES_DIR.iterdir():
+        if path.suffix not in {".txt", ".json", ".pdf"}:
+            continue
+        print(f"Ingesting {path.name}...")
+        raw_text     = load_raw_text(path)
+        profile      = normalize_profile(raw_text)
+        candidate_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, path.name))
+        upsert_profile(profile, candidate_id)
+        print(f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.current_role}")
+```
+
+`uuid.uuid5` generates a **deterministic UUID** from the filename — running ingestion twice on the same file produces the same ID, so Qdrant upserts (overwrites) rather than duplicates the point.
+
+---
+
+#### 5.8 — `skills.py` dependency
+
+`ingestion.py` imports `expand_skills_weighted` from `skills.py`. This file must exist before ingestion runs. It contains the `IMPLIES`, `SIMILAR`, and `expand_skills_weighted()` definitions discussed in Step 2.
 
 ### Step 6 — `retrieval.py` (TODO)
 
