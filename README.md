@@ -162,6 +162,7 @@ job-candidate-rag/
 Defines three services that run together on a private Docker bridge network:
 
 ```yaml
+# docker-compose.yml
 services:
   qdrant:
     image: qdrant/qdrant:latest
@@ -207,6 +208,7 @@ Key points:
 Create `.env` at the project root (never commit this):
 
 ```bash
+# .env (project root — never commit)
 OPENAI_API_KEY=sk-...
 QDRANT_URL=http://qdrant:6333
 QDRANT_COLLECTION=candidates
@@ -219,6 +221,7 @@ LLM_MODEL=gpt-4.1
 #### 1.5 — `backend/Dockerfile`
 
 ```dockerfile
+# backend/Dockerfile
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -236,6 +239,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 #### 1.6 — `backend/requirements.txt`
 
 ```
+# backend/requirements.txt
 fastapi
 uvicorn[standard]
 pydantic
@@ -253,6 +257,7 @@ pdfplumber
 A placeholder until the React app is scaffolded in Step 9. Without this file, `docker compose up --build` fails because the `build: ./frontend` directive expects a `Dockerfile` to exist.
 
 ```dockerfile
+# frontend/Dockerfile (stub)
 FROM node:20-alpine
 
 WORKDIR /app
@@ -297,6 +302,7 @@ These two files are the foundation every other module imports from. Write them f
 `pydantic-settings` extends Pydantic to read fields directly from environment variables (or a `.env` file). You declare a class and values are populated at import time — no manual `os.getenv()` calls scattered across the codebase.
 
 ```python
+# backend/config.py
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -326,6 +332,7 @@ Key points:
 Three Pydantic models cover all data shapes in the pipeline.
 
 ```python
+# backend/models.py
 from pydantic import BaseModel
 from typing import Optional
 
@@ -371,6 +378,7 @@ Key points:
 `models.py` also defines canonical example instances used to few-shot the LLM prompts in `normalizer.py`. They are defined as actual `NormalizedProfile` objects — not raw JSON strings — so they are structurally tied to the schema. If a field is added or renamed, Python raises a `TypeError` at import time rather than silently producing a malformed prompt.
 
 ```python
+# backend/models.py
 PROFILE_EXAMPLE_INPUT = """María López
 Desarrolladora Backend Senior | Barcelona
 10 años de experiencia en Python, Django y PostgreSQL.
@@ -401,6 +409,7 @@ PROFILE_EXAMPLE_OUTPUT = NormalizedProfile(
 In `normalizer.py`, the example is rendered at import time via `.model_dump_json()` and prepended to the user message — never the system prompt, which is how the model is trained to interpret few-shot examples:
 
 ```python
+# backend/normalizer.py
 _PROFILE_FEW_SHOT = (
     f"--- EXAMPLE INPUT ---\n{PROFILE_EXAMPLE_INPUT}\n\n"
     f"--- EXAMPLE OUTPUT ---\n{PROFILE_EXAMPLE_OUTPUT.model_dump_json(indent=2)}\n"
@@ -444,6 +453,7 @@ Raw candidate profiles and job descriptions arrive in any format (plain text, JS
 This module exposes two public functions:
 
 ```python
+# backend/normalizer.py
 normalize_profile(raw_text: str)          → NormalizedProfile
 normalize_job_description(raw_text: str)  → NormalizedProfile
 ```
@@ -471,6 +481,7 @@ Without this, the model may wrap its JSON in markdown fences (` ```json ... ``` 
 Instead of describing the schema in prose (which drifts as `models.py` evolves), inject the live schema at module load time:
 
 ```python
+# backend/normalizer.py
 import json
 from models import NormalizedProfile
 
@@ -490,6 +501,7 @@ The standard fix for this is **HyDE** (Hypothetical Document Embeddings) — rew
 The approach here eliminates the need for HyDE entirely: both prompts instruct the model to write the `summary` in the **same impersonal third-person register**:
 
 ```
+# backend/normalizer.py — PROFILE_SYSTEM_PROMPT / JD_SYSTEM_PROMPT
 # Candidate prompt rule:
 - 'summary': write a dense, fluent English paragraph (4–6 sentences) in impersonal
   third-person describing the candidate as a professional. Do NOT use first-person ("I",
@@ -518,6 +530,7 @@ The examples are defined as actual `NormalizedProfile` instances in `models.py` 
 - The example JSON is always in sync with the current schema — no manual maintenance
 
 ```python
+# backend/normalizer.py
 # Rendered at import time — always reflects the current schema
 _PROFILE_FEW_SHOT = (
     f"--- EXAMPLE INPUT ---\n{PROFILE_EXAMPLE_INPUT}\n\n"
@@ -533,6 +546,7 @@ The example is injected into the **user message**, not the system prompt — thi
 #### 3.7 — The full module structure
 
 ```python
+# backend/normalizer.py
 # One private helper — the only thing that differs between
 # normalizing a profile vs. a JD is the system prompt and few-shot block.
 def _call_llm(system_prompt: str, few_shot: str, raw_text: str) -> NormalizedProfile:
@@ -673,6 +687,7 @@ Each step is independent and can be tested in isolation.
 The normalizer knows nothing about file formats — it receives a plain string. `load_raw_text()` is the only place that knows about `.txt`, `.json`, and `.pdf`:
 
 ```python
+# backend/ingestion.py
 def load_raw_text(path: Path) -> str:
     if path.suffix == ".pdf":
         with pdfplumber.open(path) as pdf:
@@ -693,6 +708,7 @@ The `.json` branch deserialises and re-serialises rather than reading the raw st
 Only `profile.summary` is embedded — not the full profile JSON. That one dense, information-rich paragraph is the entire basis for semantic search.
 
 ```python
+# backend/ingestion.py
 def embed(text: str) -> list[float]:
     response = client.embeddings.create(
         model=settings.embedding_model,   # text-embedding-3-large
@@ -712,6 +728,7 @@ Qdrant sparse vectors are maps of `{ term_index → float weight }`. The index m
 Rather than maintaining a vocabulary file, a stable MD5 hash provides deterministic, collision-resistant indices with no state:
 
 ```python
+# backend/ingestion.py
 def term_to_index(term: str) -> int:
     """Stable integer index for a term — consistent across runs."""
     return int(hashlib.md5(term.lower().encode()).hexdigest(), 16) % (2**24)
@@ -720,6 +737,7 @@ def term_to_index(term: str) -> int:
 The sparse vector is built from the weighted skill expansion (see `skills.py`):
 
 ```python
+# backend/ingestion.py
 def build_sparse_vector(profile: NormalizedProfile) -> SparseVector:
     weighted = expand_skills_weighted(
         profile.hard_skills + [profile.current_role]
@@ -738,6 +756,7 @@ Exact skills get weight `1.0`, implied skills `1.0`, and similar-but-not-identic
 The collection needs two vector spaces — `dense` (cosine similarity, 3072 dims) and `sparse` (dot product for BM25):
 
 ```python
+# backend/ingestion.py
 def ensure_collection() -> None:
     existing = [c.name for c in qdrant.get_collections().collections]
     if settings.qdrant_collection not in existing:
@@ -761,6 +780,7 @@ Idempotent — safe to call on every ingestion run.
 Each candidate is stored as a Qdrant **point** with both vectors and a metadata payload:
 
 ```python
+# backend/ingestion.py
 def upsert_profile(profile: NormalizedProfile, candidate_id: str) -> None:
     dense_vector  = embed(profile.summary)
     sparse_vector = build_sparse_vector(profile)
@@ -795,6 +815,7 @@ def upsert_profile(profile: NormalizedProfile, candidate_id: str) -> None:
 #### 5.7 — The top-level entry point: `ingest_all()`
 
 ```python
+# backend/ingestion.py
 def ingest_all() -> None:
     ensure_collection()
     for path in PROFILES_DIR.iterdir():
@@ -816,26 +837,495 @@ def ingest_all() -> None:
 
 `ingestion.py` imports `expand_skills_weighted` from `skills.py`. This file must exist before ingestion runs. It contains the `IMPLIES`, `SIMILAR`, and `expand_skills_weighted()` definitions discussed in Step 2.
 
-### Step 6 — `retrieval.py` (TODO)
+### Step 6 — `retrieval.py` ✅
 
-- Accept a normalized JD
-- Embed JD summary → dense query vector
-- Extract sparse keywords → BM25 query
-- Qdrant hybrid search with RRF fusion
-- Apply optional metadata pre-filters (seniority, location, sector)
-- Return top-20 raw results for reranking
+#### 6.1 — What this module does
 
-### Step 7 — `reranker.py` (TODO)
+Retrieval mirrors ingestion in reverse. Where ingestion converts a profile into vectors and stores them, retrieval converts a job description into the same vector representations and searches for the closest matches.
 
-- Take top-20 Qdrant results + original JD text
-- LLM prompt: score each candidate 0–1 and explain the match
-- Return top-5 as `List[MatchResult]`
+```
+NormalizedProfile (JD)
+  └─► embed(jd.summary)          — dense query vector
+  └─► build_sparse_vector(jd)    — BM25 keyword query
+  └─► apply_filters()            — optional metadata pre-filters
+  └─► hybrid_search()            — Qdrant RRF fusion → top-20 raw results
+```
 
-### Step 8 — `main.py` (TODO)
+The output is a list of raw Qdrant results (not yet `MatchResult` objects) — the reranker in Step 7 adds scores and explanations.
 
-- `POST /ingest` — trigger ingestion of all profiles
-- `POST /search` — accept `SearchRequest`, run full query pipeline, return `List[MatchResult]`
-- `GET /health` — sanity check
+---
+
+#### 6.2 — Why pre-filter before semantic search
+
+Metadata pre-filtering eliminates obviously wrong matches **before** the vector search runs. Filtering seniority or location in Qdrant is a cheap boolean check — it doesn't consume any embedding distance budget. Without it, a junior developer in Tokyo might be semantically close to a senior role in Barcelona simply because they share the same tech stack.
+
+Filters are **optional** — if none are passed, the full collection is searched. This keeps the API flexible: a broad JD can search everything, a specific one can narrow down first.
+
+---
+
+#### 6.3 — Building Qdrant filters
+
+Qdrant filters work on payload fields. The `SearchRequest.filters` dict (from `models.py`) maps to Qdrant's filter DSL:
+
+```python
+# backend/retrieval.py
+from qdrant_client.models import Filter, FieldCondition, MatchValue, Range
+
+def build_filter(filters: dict | None) -> Filter | None:
+    if not filters:
+        return None
+
+    conditions = []
+
+    if seniority := filters.get("seniority"):
+        conditions.append(
+            FieldCondition(key="seniority", match=MatchValue(value=seniority))
+        )
+
+    if location := filters.get("location"):
+        conditions.append(
+            FieldCondition(key="location", match=MatchValue(value=location))
+        )
+
+    if min_years := filters.get("min_years_experience"):
+        conditions.append(
+            FieldCondition(key="years_experience", range=Range(gte=min_years))
+        )
+
+    if filters.get("open_to_remote") is True:
+        conditions.append(
+            FieldCondition(key="open_to_remote", match=MatchValue(value=True))
+        )
+
+    return Filter(must=conditions) if conditions else None
+```
+
+`must` means all conditions must pass (logical AND). Qdrant also supports `should` (OR) and `must_not` (NOT) for more complex filter logic.
+
+---
+
+#### 6.4 — The hybrid search: dense + sparse with RRF
+
+Qdrant's `query_points` with `prefetch` and `Query(fusion=Fusion.RRF)` runs both searches in parallel and merges the ranked lists using Reciprocal Rank Fusion:
+
+```python
+# backend/retrieval.py
+from qdrant_client.models import (
+    Prefetch, Query, Fusion, NamedVector, NamedSparseVector, SparseVector
+)
+from qdrant_client import QdrantClient
+from config import settings
+
+qdrant = QdrantClient(url=settings.qdrant_url)
+
+def hybrid_search(
+    dense_vector: list[float],
+    sparse_vector: SparseVector,
+    query_filter: Filter | None,
+    top_k: int = 20,
+) -> list:
+    results = qdrant.query_points(
+        collection_name=settings.qdrant_collection,
+        prefetch=[
+            Prefetch(
+                query=NamedVector(name="dense", vector=dense_vector),
+                using="dense",
+                filter=query_filter,
+                limit=top_k * 2,   # fetch more, RRF will trim
+            ),
+            Prefetch(
+                query=NamedSparseVector(
+                    name="sparse",
+                    vector=sparse_vector,
+                ),
+                using="sparse",
+                filter=query_filter,
+                limit=top_k * 2,
+            ),
+        ],
+        query=Query(fusion=Fusion.RRF),
+        limit=top_k,
+        with_payload=True,
+    )
+    return results.points
+```
+
+**Why `limit=top_k * 2` for the prefetch?**
+RRF needs to see more candidates than the final limit to rank effectively. If you only fetch 20 from each leg, a candidate that ranks #21 in dense but #1 in sparse gets dropped before RRF can promote it. Fetching 40 from each gives RRF enough material to work with.
+
+**What RRF actually does:**
+For each candidate appearing in either ranked list, its RRF score is:
+
+$$\text{score} = \sum_{r \in \text{rankings}} \frac{1}{k + r}$$
+
+where $r$ is the rank position (1-indexed) and $k$ is a smoothing constant (typically 60). A candidate ranked #1 in both lists scores highest. One that appears only in the sparse list at rank #5 still gets credit — it's not discarded.
+
+---
+
+#### 6.5 — Reusing `ingestion.py` functions
+
+`retrieval.py` needs to build the same vectors the ingestion pipeline built. Rather than duplicating `embed()`, `term_to_index()`, and `build_sparse_vector()`, import them directly:
+
+```python
+# backend/retrieval.py
+from ingestion import embed, build_sparse_vector
+```
+
+This is the correct dependency direction — retrieval depends on ingestion utilities, not the other way around. Both are pure functions with no side effects, so the import is safe.
+
+---
+
+#### 6.6 — The top-level entry point: `retrieve()`
+
+```python
+# backend/retrieval.py
+from models import NormalizedProfile
+
+def retrieve(
+    jd: NormalizedProfile,
+    filters: dict | None = None,
+    top_k: int = 20,
+) -> list:
+    dense_vector  = embed(jd.summary)
+    sparse_vector = build_sparse_vector(jd)
+    query_filter  = build_filter(filters)
+
+    return hybrid_search(dense_vector, sparse_vector, query_filter, top_k)
+```
+
+The function receives an already-normalized `NormalizedProfile` — normalization happens upstream in `main.py` (Step 8). This keeps retrieval focused: it does search, not parsing.
+
+---
+
+#### 6.7 — What the results look like
+
+Each item in the returned list is a Qdrant `ScoredPoint`:
+
+```python
+# backend/retrieval.py — example output shape
+ScoredPoint(
+    id="uuid-...",
+    score=0.031,          # RRF score — not a semantic similarity score
+    payload={
+        "name": "Elena García",
+        "current_role": "Senior Backend Developer",
+        "seniority": "senior",
+        "summary": "Senior backend engineer with 10 years...",
+        "hard_skills": ["Python", "FastAPI", "Kafka", ...],
+        ...
+    }
+)
+```
+
+The `score` here is the RRF score — a ranking signal, not a human-readable match percentage. The reranker in Step 7 replaces this with a `0.0–1.0` business fit score and adds a natural language explanation.
+
+### Step 7 — `reranker.py` ✅
+
+Qdrant returns up to 20 candidates ranked by RRF score. RRF is good at **recall** — it surfaces candidates who match either the dense or sparse query — but it has no semantic understanding of whether a candidate is actually a good fit for the job. That judgment belongs to the LLM.
+
+The reranker passes all 20 candidates to the LLM in a single call and asks it to score each one 0.0–1.0 against the job description, explain the match in one sentence, and list the skills present in both. The top 5 are returned as typed `MatchResult` objects.
+
+---
+
+#### 7.1 — Why a single batch call?
+
+You could call the LLM once per candidate (20 calls), but one batch call is better:
+
+- **Cost and latency** — one API round trip instead of twenty
+- **Calibration** — with all candidates in context the model can score them _relative to each other_. A 0.8 is more meaningful when the model has seen the full field and actively chose not to award 0.9 to anyone else
+
+---
+
+#### 7.2 — Enforcing the output schema with Pydantic
+
+Rather than just describing the expected JSON in the prompt and hoping the model follows it, the OpenAI SDK's `beta.chat.completions.parse()` endpoint accepts a Pydantic model as `response_format`. The SDK converts it to a JSON Schema, passes it to the model with `strict: true`, and validates the response before it reaches your code.
+
+Two internal models (prefixed with `_` to signal they are private to the module) define exactly what each array item must contain and what the wrapper object looks like:
+
+```python
+# backend/reranker.py
+from pydantic import BaseModel as PydanticModel
+
+class _RerankItem(PydanticModel):
+    candidate_id: str
+    score: float
+    reasoning: str
+    matched_skills: list[str]
+
+class _RerankResponse(PydanticModel):
+    results: list[_RerankItem]
+```
+
+`_RerankResponse` wraps the array under a `results` key — the JSON Schema format requires an object at the top level, not a bare array.
+
+Because the schema is enforced by the SDK, the system prompt no longer needs to describe JSON formatting rules. It can focus purely on the task:
+
+```python
+# backend/reranker.py
+RERANK_SYSTEM_PROMPT = """You are a talent matching expert.
+
+Given a job description and a list of candidates, score each candidate's fit from 0.0 to 1.0.
+
+Order results highest score first. For each candidate provide:
+  candidate_id: copy exactly from the input
+  score: float 0.0–1.0
+  reasoning: one sentence, third-person, impersonal
+  matched_skills: skills present in both the JD and the candidate"""
+```
+
+The `matched_skills` instruction ("present in both") keeps the model honest — it cannot invent skills the candidate doesn't have.
+
+---
+
+#### 7.3 — `_build_prompt()`
+
+Formats the JD and all 20 candidates into a single readable text block. The candidate `summary` field carries the most signal — it is the normalized, impersonal third-person description written by the normalizer in Step 3, and it was stored in the Qdrant payload precisely so the reranker can read it without a second lookup:
+
+```python
+# backend/reranker.py
+def _build_prompt(points: list[ScoredPoint], jd: NormalizedProfile) -> str:
+    lines = [
+        "JOB DESCRIPTION",
+        f"Role: {jd.current_role} ({jd.seniority})",
+        f"Summary: {jd.summary}",
+        f"Skills: {', '.join(jd.hard_skills)}",
+        "",
+        "CANDIDATES",
+    ]
+    for point in points:
+        p = point.payload
+        lines += [
+            "---",
+            f"id: {point.id}",
+            f"Name: {p.get('name', 'Unknown')}",
+            f"Role: {p.get('current_role')} ({p.get('seniority')})",
+            f"Summary: {p.get('summary')}",
+            f"Skills: {', '.join(p.get('hard_skills', []))}",
+        ]
+    return "\n".join(lines)
+```
+
+---
+
+#### 7.4 — `_point_to_profile()`
+
+Each `ScoredPoint` payload is a plain dict. This helper reconstructs the typed `NormalizedProfile` that the `MatchResult` schema requires:
+
+```python
+# backend/reranker.py
+def _point_to_profile(payload: dict) -> NormalizedProfile:
+    return NormalizedProfile(
+        name=payload.get("name"),
+        summary=payload.get("summary", ""),
+        current_role=payload.get("current_role"),
+        seniority=payload.get("seniority"),
+        years_experience=payload.get("years_experience"),
+        sector=payload.get("sector"),
+        hard_skills=payload.get("hard_skills", []),
+        soft_skills=payload.get("soft_skills", []),
+        languages=payload.get("languages", []),
+        location=payload.get("location"),
+        open_to_remote=payload.get("open_to_remote"),
+        education=payload.get("education"),
+    )
+```
+
+---
+
+#### 7.5 — `rerank()` — the public function
+
+```python
+# backend/reranker.py
+def rerank(
+    points: list[ScoredPoint],
+    jd: NormalizedProfile,
+    top_n: int = 5,
+) -> list[MatchResult]:
+    if not points:
+        return []
+
+    prompt = _build_prompt(points, jd)
+
+    response = client.beta.chat.completions.parse(
+        model=settings.llm_model,
+        temperature=0,
+        response_format=_RerankResponse,
+        messages=[
+            {"role": "system", "content": RERANK_SYSTEM_PROMPT},
+            {"role": "user",   "content": prompt},
+        ],
+    )
+
+    items = response.choices[0].message.parsed.results
+
+    payload_by_id = {str(p.id): p.payload for p in points}
+
+    results = []
+    for item in items[:top_n]:
+        payload = payload_by_id.get(item.candidate_id, {})
+        results.append(MatchResult(
+            candidate_id=item.candidate_id,
+            name=payload.get("name", "Unknown"),
+            score=item.score,
+            reasoning=item.reasoning,
+            matched_skills=item.matched_skills,
+            profile=_point_to_profile(payload),
+        ))
+
+    return results
+```
+
+Key design notes:
+
+- **`temperature=0`** — same as `normalizer.py`. Reranking is a deterministic judgment task, not creative generation
+- **`.parsed.results`** — `.parsed` is already a typed `_RerankResponse`; no `json.loads()`, no dict key access, no defensive fallback needed
+- **`payload_by_id` lookup** — the LLM returns candidate IDs copied from the prompt; we look up the original payload to populate `MatchResult` without a second Qdrant query
+- **`items[:top_n]`** — the LLM already ordered results highest-to-lowest; slicing to top 5 is sufficient
+
+---
+
+#### 7.6 — Full file structure
+
+```python
+# backend/reranker.py
+from openai import OpenAI
+from pydantic import BaseModel as PydanticModel
+from qdrant_client.models import ScoredPoint
+from models import MatchResult, NormalizedProfile
+from config import settings
+
+client = OpenAI(api_key=settings.openai_api_key)
+
+class _RerankItem(PydanticModel): ...    # 7.2 — per-candidate schema
+class _RerankResponse(PydanticModel): ... # 7.2 — top-level wrapper
+
+RERANK_SYSTEM_PROMPT = "..."             # 7.2
+
+def _build_prompt(...)     -> str: ...              # 7.3
+def _point_to_profile(...) -> NormalizedProfile: ... # 7.4
+def rerank(...)            -> list[MatchResult]: ... # 7.5
+```
+
+### Step 8 — `main.py` ✅
+
+`main.py` is the thin orchestration layer. It wires together everything built in Steps 2–7: receives HTTP requests, calls the pipeline in order, and returns typed responses. No business logic lives here.
+
+---
+
+#### 8.1 — App setup
+
+```python
+# backend/main.py
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+from ingestion import ingest_all
+from retrieval import retrieve
+from reranker import rerank
+from normalizer import normalize_job_description
+from models import SearchRequest, MatchResult
+
+app = FastAPI(title="Job-Candidate RAG")
+```
+
+`SearchRequest` and `MatchResult` are already defined in `models.py` — no new schemas needed here.
+
+---
+
+#### 8.2 — CORS middleware
+
+The React frontend runs on port 5173 and calls the API on port 8000 — a different origin. Browsers block cross-origin requests by default. Adding CORS middleware allows the frontend to reach the API:
+
+```python
+# backend/main.py
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+`allow_origins` is an explicit whitelist — only requests from the known frontend origin are permitted. Using `["*"]` would allow any website to call the API.
+
+---
+
+#### 8.3 — `GET /health`
+
+```python
+# backend/main.py
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+```
+
+Simple liveness check. Docker and orchestrators poll this to confirm the container is up.
+
+---
+
+#### 8.4 — `POST /ingest`
+
+```python
+# backend/main.py
+@app.post("/ingest")
+def ingest():
+    try:
+        ingest_all()
+        return {"status": "ingestion complete"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+```
+
+Triggers the full ingestion pipeline — reads every file from `data/sample_profiles/`, normalizes, embeds, and upserts to Qdrant. `ingest_all()` is idempotent (uuid5 IDs + upsert), so calling it twice is safe.
+
+---
+
+#### 8.5 — `POST /search` — the main pipeline
+
+This is the only endpoint that matters for the demo. The pipeline is a four-step sequence:
+
+```
+raw JD text
+  → normalize_job_description()  [normalizer.py]  → NormalizedProfile
+  → retrieve()                   [retrieval.py]   → list[ScoredPoint]  (top 20)
+  → rerank()                     [reranker.py]    → list[MatchResult]  (top 5)
+```
+
+```python
+# backend/main.py
+@app.post("/search", response_model=list[MatchResult])
+def search(request: SearchRequest):
+    jd_profile = normalize_job_description(request.job_description)
+    points     = retrieve(jd_profile, filters=request.filters)
+    results    = rerank(points, jd_profile)
+    return results
+```
+
+Four lines — one per pipeline step. `response_model=list[MatchResult]` tells FastAPI to validate and serialize the return value. If `rerank()` ever returns something that doesn't conform to `MatchResult`, FastAPI raises a 500 before it reaches the client.
+
+---
+
+#### 8.6 — What the response looks like
+
+```json
+// POST /search — example response
+[
+	{
+		"candidate_id": "uuid-...",
+		"name": "Elena García",
+		"score": 0.91,
+		"reasoning": "Candidate has extensive backend experience with Python and PostgreSQL, directly matching the FinTech role requirements.",
+		"matched_skills": ["Python", "PostgreSQL", "Docker", "FastAPI"],
+		"profile": {
+			"summary": "Senior backend engineer with 7 years of experience...",
+			"current_role": "Senior Backend Engineer",
+			"seniority": "senior"
+		}
+	}
+]
+```
+
+The `score` is now a human-readable 0.0–1.0 fit rating assigned by the LLM, replacing the raw RRF score from Qdrant.
 
 ### Step 9 — Frontend (TODO)
 
