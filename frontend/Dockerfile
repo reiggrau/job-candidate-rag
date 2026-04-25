@@ -1,13 +1,16 @@
+# Build stage
+FROM node:20-alpine AS builder
+RUN apk upgrade --no-cache
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Production stage
 FROM node:20-alpine
 RUN apk upgrade --no-cache
-
-WORKDIR /app
-
-# Stub placeholder — replace with real Vite/React build once frontend is scaffolded
-RUN echo '<!DOCTYPE html><html><body><h1>Frontend coming soon</h1></body></html>' > index.html
-
 RUN npm install -g serve
-
+COPY --from=builder /app/dist /app
 EXPOSE 5173
-
-CMD ["serve", "-l", "5173", "."]
+CMD ["serve", "-l", "5173", "/app"]
