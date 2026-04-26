@@ -8,10 +8,9 @@ interface SearchFormProps {
 	onDescriptionChange: (value: string) => void;
 }
 
-export default function SearchForm({
-	description,
-	onDescriptionChange,
-}: SearchFormProps) {
+export default function SearchForm(props: SearchFormProps) {
+	const { description, onDescriptionChange } = props;
+
 	const [results, setResults] = useState<MatchResult[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
