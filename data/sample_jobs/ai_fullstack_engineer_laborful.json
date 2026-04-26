@@ -1,36 +1,43 @@
 {
-  "company": "Laborful",
-  "title": "AI-Focused Full Stack Engineer",
-  "location": "Barcelona (Eixample) — hybrid, ~3 days/week in office",
-  "team_size": 6,
-  "description": "Early-stage B2B SaaS platform looking for a full-stack engineer to lead a new AI-enablement squad. The role sits at the intersection of product engineering and applied AI — building internal tooling, agent pipelines, and AI-powered features on top of an existing product stack.",
-  "responsibilities": [
-    "Design and build AI-powered features and internal tooling for the platform",
-    "Develop and maintain agent pipelines and orchestration systems",
-    "Integrate LLM SDKs (OpenAI, Anthropic) into production workflows",
-    "Collaborate closely with product and engineering across frontend and backend concerns",
-    "Use AI as a force multiplier in day-to-day development (Claude Code, Cursor, etc.)"
-  ],
-  "tech_stack": {
-    "frontend": ["React", "Next.js", "TailwindCSS"],
-    "backend": ["Node.js", "PostgreSQL", "MariaDB"],
-    "infrastructure": ["AWS", "Docker", "Auth0"],
-    "ai": ["MCP", "OpenAI Agents SDK", "Claude Agents SDK", "AI evaluation systems", "agent orchestration pipelines"]
-  },
-  "requirements": [
-    "Strong full-stack engineering background with React and TypeScript",
-    "Hands-on experience building or integrating LLM-powered features",
-    "Familiarity with agent frameworks and orchestration (MCP, OpenAI SDK, Claude SDK)",
-    "Experience with AWS and cloud deployments",
-    "Comfortable working in an early-stage, high-autonomy environment",
-    "Interest in AI evaluation and pipeline reliability"
-  ],
-  "nice_to_have": [
-    "Experience presenting or demoing technical work to non-technical audiences",
-    "Background in Python for AI/ML tooling",
-    "Familiarity with Clean or Hexagonal Architecture principles"
-  ],
-  "seniority": "mid-senior",
-  "remote": false,
-  "open_to_remote": false
+	"company": "Laborful",
+	"title": "AI-Focused Full Stack Engineer",
+	"location": "Barcelona (Eixample) — hybrid, ~3 days/week in office",
+	"team_size": 6,
+	"description": "Early-stage B2B SaaS platform looking for a full-stack engineer to lead a new AI-enablement squad. The role sits at the intersection of product engineering and applied AI — building internal tooling, agent pipelines, and AI-powered features on top of an existing product stack.",
+	"responsibilities": [
+		"Design and build AI-powered features and internal tooling for the platform",
+		"Develop and maintain agent pipelines and orchestration systems",
+		"Integrate LLM SDKs (OpenAI, Anthropic) into production workflows",
+		"Collaborate closely with product and engineering across frontend and backend concerns",
+		"Use AI as a force multiplier in day-to-day development (Claude Code, Cursor, etc.)"
+	],
+	"tech_stack": {
+		"frontend": ["React", "Next.js", "TailwindCSS"],
+		"backend": ["Node.js", "PostgreSQL", "MariaDB"],
+		"infrastructure": ["AWS", "Docker", "Auth0"],
+		"ai": [
+			"MCP",
+			"OpenAI Agents SDK",
+			"Claude Agents SDK",
+			"AI evaluation systems",
+			"agent orchestration pipelines"
+		]
+	},
+	"requirements": [
+		"Strong full-stack engineering background with React and TypeScript",
+		"Hands-on experience building or integrating LLM-powered features",
+		"Familiarity with agent frameworks and orchestration (MCP, OpenAI SDK, Claude SDK)",
+		"Experience with AWS and cloud deployments",
+		"Comfortable working in an early-stage, high-autonomy environment",
+		"Interest in AI evaluation and pipeline reliability"
+	],
+	"nice_to_have": [
+		"Experience presenting or demoing technical work to non-technical audiences",
+		"Background in Python for AI/ML tooling",
+		"Familiarity with Clean or Hexagonal Architecture principles"
+	],
+	"seniority": "mid-senior",
+	"min_years_experience": 4,
+	"remote": false,
+	"open_to_remote": false
 }

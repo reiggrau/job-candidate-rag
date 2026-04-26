@@ -10,10 +10,11 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, Distance, SparseVectorParams, SparseVector
 from skills import expand_skills_weighted
 from models import NormalizedProfile
-from normalizer import normalize_profile
+from normalizer import normalize_profile, normalize_job_description
 from config import settings
 
 PROFILES_DIR = Path(__file__).parent.parent / "data" / "sample_profiles"
+JOBS_DIR = Path(__file__).parent.parent / "data" / "sample_jobs"
 
 
 def load_raw_text(path: Path) -> str:
@@ -48,7 +49,7 @@ def term_to_index(term: str) -> int:
 def build_sparse_vector(profile: NormalizedProfile) -> SparseVector:
     """Build a sparse vector from the candidate's skills."""
     weighted = expand_skills_weighted(
-        profile.hard_skills + [profile.current_role]
+        profile.hard_skills + [profile.role]
     )  # e.g. {"React": 1.0, "JavaScript": 1.0, "Vue": 0.6, "Angular": 0.5}
     indices = [term_to_index(term) for term in weighted]
     values = [float(weight) for weight in weighted.values()]
@@ -59,18 +60,19 @@ qdrant = QdrantClient(url=settings.qdrant_url)
 
 
 def ensure_collection() -> None:
-    """Create the collection if it doesn't exist."""
+    """Create both collections if they don't exist."""
     existing = [c.name for c in qdrant.get_collections().collections]
-    if settings.qdrant_collection not in existing:
-        qdrant.create_collection(
-            collection_name=settings.qdrant_collection,
-            vectors_config={
-                "dense": VectorParams(size=3072, distance=Distance.COSINE),
-            },
-            sparse_vectors_config={
-                "sparse": SparseVectorParams(),
-            },
-        )
+    for collection in (settings.qdrant_collection, settings.jobs_collection):
+        if collection not in existing:
+            qdrant.create_collection(
+                collection_name=collection,
+                vectors_config={
+                    "dense": VectorParams(size=3072, distance=Distance.COSINE),
+                },
+                sparse_vectors_config={
+                    "sparse": SparseVectorParams(),
+                },
+            )
 
 
 def upsert_profile(profile: NormalizedProfile, candidate_id: str) -> None:
@@ -89,7 +91,7 @@ def upsert_profile(profile: NormalizedProfile, candidate_id: str) -> None:
                 },
                 payload={
                     "name":             profile.name,
-                    "current_role":     profile.current_role,
+                    "role":             profile.role,
                     "seniority":        profile.seniority,
                     "years_experience": profile.years_experience,
                     "sector":           profile.sector,
@@ -104,8 +106,39 @@ def upsert_profile(profile: NormalizedProfile, candidate_id: str) -> None:
     )
 
 
+def upsert_job(profile: NormalizedProfile, job_id: str) -> None:
+    """Upsert a normalized job description into the jobs collection."""
+    dense_vector = embed(profile.summary)
+    sparse_vector = build_sparse_vector(profile)
+
+    qdrant.upsert(
+        collection_name=settings.jobs_collection,
+        points=[
+            PointStruct(
+                id=job_id,
+                vector={
+                    "dense":  dense_vector,
+                    "sparse": sparse_vector,
+                },
+                payload={
+                    "name":             profile.name,
+                    "role":             profile.role,
+                    "seniority":        profile.seniority,
+                    "years_experience": profile.years_experience,
+                    "sector":           profile.sector,
+                    "hard_skills":      profile.hard_skills,
+                    "languages":        profile.languages,
+                    "location":         profile.location,
+                    "open_to_remote":   profile.open_to_remote,
+                    "summary":          profile.summary,
+                },
+            )
+        ],
+    )
+
+
 def ingest_all() -> None:
-    """Ingest all profiles from the data directory."""
+    """Ingest all profiles and job descriptions from the data directory."""
     ensure_collection()
     for path in PROFILES_DIR.iterdir():
         if path.suffix not in {".txt", ".json", ".pdf"}:
@@ -116,4 +149,14 @@ def ingest_all() -> None:
         candidate_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, path.name))
         upsert_profile(profile, candidate_id)
         print(
-            f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.current_role}")
+            f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.role}")
+    for path in JOBS_DIR.iterdir():
+        if path.suffix not in {".txt", ".json", ".pdf"}:
+            continue
+        print(f"Ingesting job {path.name}...")
+        raw_text = load_raw_text(path)
+        profile = normalize_job_description(raw_text)
+        job_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, path.name))
+        upsert_job(profile, job_id)
+        print(
+            f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.role}")

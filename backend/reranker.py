@@ -32,7 +32,7 @@ Order results highest score first. For each candidate provide:
 def _build_prompt(points: list[ScoredPoint], jd: NormalizedProfile) -> str:
     lines = [
         "JOB DESCRIPTION",
-        f"Role: {jd.current_role} ({jd.seniority})",
+        f"Role: {jd.role} ({jd.seniority})",
         f"Summary: {jd.summary}",
         f"Skills: {', '.join(jd.hard_skills)}",
         "",
@@ -44,7 +44,7 @@ def _build_prompt(points: list[ScoredPoint], jd: NormalizedProfile) -> str:
             "---",
             f"id: {point.id}",
             f"Name: {p.get('name', 'Unknown')}",
-            f"Role: {p.get('current_role')} ({p.get('seniority')})",
+            f"Role: {p.get('role')} ({p.get('seniority')})",
             f"Summary: {p.get('summary')}",
             f"Skills: {', '.join(p.get('hard_skills', []))}",
         ]
@@ -55,7 +55,7 @@ def _point_to_profile(payload: dict) -> NormalizedProfile:
     return NormalizedProfile(
         name=payload.get("name"),
         summary=payload.get("summary", ""),
-        current_role=payload.get("current_role"),
+        role=payload.get("role"),
         seniority=payload.get("seniority"),
         years_experience=payload.get("years_experience"),
         sector=payload.get("sector"),

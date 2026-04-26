@@ -42,10 +42,11 @@ def hybrid_search(
     dense_vector: list[float],
     sparse_vector: SparseVector,
     query_filter: Filter | None,
+    collection: str,
     top_k: int = 20,
 ) -> list:
     results = qdrant.query_points(
-        collection_name=settings.qdrant_collection,
+        collection_name=collection,
         prefetch=[
             Prefetch(
                 query=NamedVector(name="dense", vector=dense_vector),
@@ -71,12 +72,13 @@ def hybrid_search(
 
 
 def retrieve(
-    jd: NormalizedProfile,
+    profile: NormalizedProfile,
     filters: dict | None = None,
+    collection: str = settings.qdrant_collection,
     top_k: int = 20,
 ) -> list:
-    dense_vector = embed(jd.summary)
-    sparse_vector = build_sparse_vector(jd)
+    dense_vector = embed(profile.summary)
+    sparse_vector = build_sparse_vector(profile)
     query_filter = build_filter(filters)
 
-    return hybrid_search(dense_vector, sparse_vector, query_filter, top_k)
+    return hybrid_search(dense_vector, sparse_vector, query_filter, collection, top_k)

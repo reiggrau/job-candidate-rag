@@ -45,9 +45,9 @@ Applies to both candidate profiles and job descriptions (the symmetric design is
 
 ```json
 {
-	"name": "string (candidate only — null for JDs)",
+	"name": "string — candidate's full name, or hiring company name for job postings",
 	"summary": "string — clean English prose paragraph, dense with skills and context, used for embedding",
-	"current_role": "string",
+	"role": "string",
 	"seniority": "junior | mid | senior | lead | executive",
 	"years_experience": "number",
 	"sector": ["string"],
@@ -147,7 +147,7 @@ job-candidate-rag/
 │   ├── normalizer.py
 │   ├── reranker.py
 │   └── retrieval.py
-├── frontend/          ← stub for now; replaced in Step 9
+├── frontend/          ← stub for now; replaced in Step 10
 ├── data/
 │   ├── sample_profiles/
 │   └── sample_jobs/
@@ -210,11 +210,12 @@ Create `.env` at the project root (never commit this):
 ```bash
 # .env (project root — never commit)
 OPENAI_API_KEY=sk-...
-QDRANT_URL=http://qdrant:6333
 QDRANT_COLLECTION=candidates
 EMBEDDING_MODEL=text-embedding-3-large
 LLM_MODEL=gpt-4.1
 ```
+
+`QDRANT_URL` is intentionally omitted — `config.py` defaults to `http://localhost:6333` for local dev. Docker Compose injects `QDRANT_URL=http://qdrant:6333` via its `environment:` block, so each context gets the right value automatically.
 
 ---
 
@@ -254,7 +255,7 @@ pdfplumber
 
 #### 1.7 — `frontend/Dockerfile` (stub)
 
-A placeholder until the React app is scaffolded in Step 9. Without this file, `docker compose up --build` fails because the `build: ./frontend` directive expects a `Dockerfile` to exist.
+A placeholder until the React app is scaffolded in Step 10. Without this file, `docker compose up --build` fails because the `build: ./frontend` directive expects a `Dockerfile` to exist.
 
 ```dockerfile
 # frontend/Dockerfile (stub)
@@ -289,7 +290,11 @@ curl http://localhost:6333/
 # → {"title":"qdrant - version 1.x.x","version":"1.x.x","commit":"..."}
 ```
 
-The Qdrant dashboard is also available at `http://localhost:6333/dashboard` — useful for inspecting collections and vectors.
+The Qdrant **built-in web dashboard** is available at [`http://localhost:6333/dashboard`](http://localhost:6333/dashboard) while Docker is running. From there you can:
+
+- See both `candidates` and `jobs` collections with their point counts
+- Browse individual points (vectors + payload)
+- Run ad-hoc searches and filter queries visually
 
 ### Step 2 — `config.py` + `models.py` ✅
 
@@ -303,16 +308,20 @@ These two files are the foundation every other module imports from. Write them f
 
 ```python
 # backend/config.py
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_ENV_FILE = Path(__file__).parent.parent / ".env"
 
 class Settings(BaseSettings):
     openai_api_key: str
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection: str = "candidates"
+    jobs_collection: str = "jobs"
     embedding_model: str = "text-embedding-3-large"
     llm_model: str = "gpt-4.1"
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_ENV_FILE, extra="ignore")
 
 settings = Settings()
 ```
@@ -323,6 +332,7 @@ Key points:
 - Fields with no default (e.g. `openai_api_key`) raise a `ValidationError` at startup if missing — fail fast, not silently.
 - Fields with defaults (e.g. `qdrant_url`) are safe to omit from `.env`, useful for local dev where Qdrant runs on `localhost` rather than the Docker service name.
 - `extra="ignore"` means unrecognised env vars (`PATH`, `HOME`, etc.) don't cause errors.
+- `_ENV_FILE` anchors the `.env` path to the project root via `Path(__file__).parent.parent`. Using a plain `".env"` string resolves relative to the **working directory**, which causes a `ValidationError` when uvicorn is started from inside the `backend/` folder.
 - The module-level `settings = Settings()` means all other modules do `from config import settings` — one import, no repeated instantiation.
 
 ---
@@ -334,26 +344,27 @@ Three Pydantic models cover all data shapes in the pipeline.
 ```python
 # backend/models.py
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Literal
 
 class NormalizedProfile(BaseModel):
-    name: Optional[str] = None       # candidate only — null for JDs
-    summary: str                      # clean English prose — used for embedding
-    current_role: str
-    seniority: str                    # junior | mid | senior | lead | executive
-    years_experience: float
-    sector: list[str]
-    hard_skills: list[str]            # exact tool/technology names
-    soft_skills: list[str]
-    languages: list[str]
-    location: str
-    open_to_remote: bool
-    education: str
+    name: Optional[str] = None            # candidate's full name or hiring company name
+    summary: str                          # clean English prose — used for embedding
+    role: Optional[str] = None
+    seniority: Optional[str] = None       # junior | mid | senior | lead | executive
+    years_experience: float               # required — estimate from career dates if not explicit
+    sector: list[str] = []
+    hard_skills: list[str] = []           # exact tool/technology names
+    soft_skills: list[str] = []
+    languages: list[str] = []
+    location: Optional[str] = None
+    open_to_remote: Optional[bool] = None
+    education: Optional[str] = None
 
 
 class SearchRequest(BaseModel):
-    job_description: str              # raw JD text — any format, any language
-    filters: Optional[dict] = None   # optional metadata pre-filters
+    query_text: str                          # raw CV or JD text — any format, any language
+    direction: Literal["job_to_candidate", "candidate_to_job"] = "job_to_candidate"
+    filters: Optional[dict] = None           # optional metadata pre-filters
 
 
 class MatchResult(BaseModel):
@@ -367,9 +378,10 @@ class MatchResult(BaseModel):
 
 Key points:
 
-- `NormalizedProfile` is used for **both** candidates and job descriptions. When normalizing a JD, `name` is `None`. This symmetry means `normalizer.py`, `ingestion.py`, and `retrieval.py` all work with the same type.
+- `NormalizedProfile` is used for **both** candidates and job descriptions. The `name` field holds the candidate's full name for profiles, or the hiring company name (e.g. `"NTT Data"`, `"Clio"`) for job postings — `null` if not stated. This symmetry is what makes the pipeline reversible: the same embedding and retrieval code works in both directions.
 - `summary` is the field that gets embedded. It must be a dense, skill-rich English paragraph — not a JSON dump. The LLM normalization step (Step 3) is responsible for writing it well.
 - `hard_skills` stores **exact, canonical names** (`"PostgreSQL"`, not `"databases"`) because these feed the sparse BM25 index, which depends on term-level matching. Skill expansion (implied and similar skills) is handled separately in `skills.py` (see Step 5).
+- `SearchRequest.direction` controls which collection is searched and which normalizer is called: `"job_to_candidate"` embeds a JD and searches the `candidates` collection; `"candidate_to_job"` embeds a CV and searches the `jobs` collection. The default is `"job_to_candidate"`.
 - `SearchRequest.filters` is a free-form dict for now — Step 6 defines valid keys (e.g. `{"seniority": "senior", "location": "Barcelona"}`).
 - `MatchResult.score` comes from the LLM reranker in Step 7, not from vector distance. Vector distance ranks candidates; the LLM scores them on business fit.
 
@@ -393,7 +405,7 @@ PROFILE_EXAMPLE_OUTPUT = NormalizedProfile(
         "and Docker. Currently working in a high-scale food delivery environment. "
         "Based in Barcelona, fluent in Spanish and English."
     ),
-    current_role="Senior Backend Developer",
+    role="Senior Backend Developer",
     seniority="senior",
     years_experience=10,
     sector=["food delivery", "e-commerce"],
@@ -433,8 +445,8 @@ The example is intentionally in **Spanish** — a different language from the En
 .env
   └─► config.py (Settings)
            ├─► normalizer.py   (openai_api_key, llm_model)
-           ├─► ingestion.py    (qdrant_url, embedding_model)
-           └─► retrieval.py    (qdrant_url, qdrant_collection)
+           ├─► ingestion.py    (qdrant_url, embedding_model, qdrant_collection, jobs_collection)
+           └─► retrieval.py    (qdrant_url, qdrant_collection, jobs_collection)
 
 models.py (NormalizedProfile, SearchRequest, MatchResult)
            ├─► normalizer.py   returns NormalizedProfile
@@ -458,7 +470,7 @@ normalize_profile(raw_text: str)          → NormalizedProfile
 normalize_job_description(raw_text: str)  → NormalizedProfile
 ```
 
-Both return the same `NormalizedProfile` type — the symmetric design means the rest of the pipeline doesn't need to know which side it's processing.
+Both return the same `NormalizedProfile` type — the symmetric design means the rest of the pipeline doesn't need to know which side it's processing. This symmetry is also what makes the search reversible: `normalize_job_description` is used when the query is a JD (searching for candidates), and `normalize_profile` is used when the query is a CV (searching for matching jobs). Both outputs are embedded and searched against the appropriate Qdrant collection.
 
 ---
 
@@ -740,7 +752,7 @@ The sparse vector is built from the weighted skill expansion (see `skills.py`):
 # backend/ingestion.py
 def build_sparse_vector(profile: NormalizedProfile) -> SparseVector:
     weighted = expand_skills_weighted(
-        profile.hard_skills + [profile.current_role]
+        profile.hard_skills + [profile.role]
     )  # e.g. {"React": 1.0, "JavaScript": 1.0, "Vue": 0.6, "Angular": 0.5}
     indices = [term_to_index(term) for term in weighted]
     values  = [float(weight) for weight in weighted.values()]
@@ -793,7 +805,7 @@ def upsert_profile(profile: NormalizedProfile, candidate_id: str) -> None:
                 vector={"dense": dense_vector, "sparse": sparse_vector},
                 payload={
                     "name":             profile.name,
-                    "current_role":     profile.current_role,
+                    "role":     profile.role,
                     "seniority":        profile.seniority,
                     "years_experience": profile.years_experience,
                     "sector":           profile.sector,
@@ -826,7 +838,7 @@ def ingest_all() -> None:
         profile      = normalize_profile(raw_text)
         candidate_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, path.name))
         upsert_profile(profile, candidate_id)
-        print(f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.current_role}")
+        print(f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.role}")
 ```
 
 `uuid.uuid5` generates a **deterministic UUID** from the filename — running ingestion twice on the same file produces the same ID, so Qdrant upserts (overwrites) rather than duplicates the point.
@@ -836,6 +848,105 @@ def ingest_all() -> None:
 #### 5.8 — `skills.py` dependency
 
 `ingestion.py` imports `expand_skills_weighted` from `skills.py`. This file must exist before ingestion runs. It contains the `IMPLIES`, `SIMILAR`, and `expand_skills_weighted()` definitions discussed in Step 2.
+
+---
+
+#### 5.9 — Job ingestion
+
+Jobs are stored in a separate Qdrant collection (`jobs`) so that the similarity search can run in both directions:
+
+- **JD → candidates** (the `/search` flow already built)
+- **Candidate → matching jobs** (future endpoint: pass a candidate's profile as the query)
+
+The ingestion logic is identical to candidate ingestion — normalize with `normalize_job_description()`, embed the summary, build a sparse vector, upsert. The only differences are the source directory, the collection name, and the normalizer function used.
+
+First, add a `JOBS_DIR` constant to `ingestion.py`:
+
+```python
+# backend/ingestion.py  (add constant)
+JOBS_DIR = Path(__file__).parent.parent / "data" / "sample_jobs"
+```
+
+(`jobs_collection` is already declared in `config.py` from Step 2.)
+
+Then extend `ensure_collection()` to create both collections:
+
+```python
+# backend/ingestion.py
+def ensure_collection() -> None:
+    existing = [c.name for c in qdrant.get_collections().collections]
+    for collection in (settings.qdrant_collection, settings.jobs_collection):
+        if collection not in existing:
+            qdrant.create_collection(
+                collection_name=collection,
+                vectors_config={
+                    "dense": VectorParams(size=3072, distance=Distance.COSINE),
+                },
+                sparse_vectors_config={
+                    "sparse": SparseVectorParams(),
+                },
+            )
+```
+
+Add a dedicated upsert function for jobs — same shape as `upsert_profile()` but targets `jobs_collection`:
+
+```python
+# backend/ingestion.py
+def upsert_job(profile: NormalizedProfile, job_id: str) -> None:
+    dense_vector  = embed(profile.summary)
+    sparse_vector = build_sparse_vector(profile)
+
+    qdrant.upsert(
+        collection_name=settings.jobs_collection,
+        points=[
+            PointStruct(
+                id=job_id,
+                vector={"dense": dense_vector, "sparse": sparse_vector},
+                payload={
+                    "name":             profile.name,
+                    "role":             profile.role,
+                    "seniority":        profile.seniority,
+                    "years_experience": profile.years_experience,
+                    "sector":           profile.sector,
+                    "hard_skills":      profile.hard_skills,
+                    "location":         profile.location,
+                    "open_to_remote":   profile.open_to_remote,
+                    "summary":          profile.summary,
+                },
+            )
+        ],
+    )
+```
+
+`name` stores the hiring company name extracted by the normalizer — it follows the same convention as candidate profiles, where `name` is the person's full name.
+
+`ingest_all()` handles both candidates and jobs in one pass:
+
+```python
+# backend/ingestion.py
+def ingest_all() -> None:
+    ensure_collection()
+    for path in PROFILES_DIR.iterdir():
+        if path.suffix not in {".txt", ".json", ".pdf"}:
+            continue
+        print(f"Ingesting {path.name}...")
+        raw_text     = load_raw_text(path)
+        profile      = normalize_profile(raw_text)
+        candidate_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, path.name))
+        upsert_profile(profile, candidate_id)
+        print(f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.role}")
+    for path in JOBS_DIR.iterdir():
+        if path.suffix not in {".txt", ".json", ".pdf"}:
+            continue
+        print(f"Ingesting job {path.name}...")
+        raw_text = load_raw_text(path)
+        profile  = normalize_job_description(raw_text)
+        job_id   = str(uuid.uuid5(uuid.NAMESPACE_DNS, path.name))
+        upsert_job(profile, job_id)
+        print(f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.role}")
+```
+
+With both collections populated, the Qdrant dashboard at `http://localhost:6333/dashboard` will show two collections: `candidates` and `jobs`, each with dense + sparse vectors.
 
 ### Step 6 — `retrieval.py` ✅
 
@@ -906,7 +1017,7 @@ def build_filter(filters: dict | None) -> Filter | None:
 
 #### 6.4 — The hybrid search: dense + sparse with RRF
 
-Qdrant's `query_points` with `prefetch` and `Query(fusion=Fusion.RRF)` runs both searches in parallel and merges the ranked lists using Reciprocal Rank Fusion:
+Qdrant's `query_points` with `prefetch` and `Query(fusion=Fusion.RRF)` runs both searches in parallel and merges the ranked lists using Reciprocal Rank Fusion. The function accepts a `collection` parameter so it can search either the `candidates` or `jobs` collection depending on search direction:
 
 ```python
 # backend/retrieval.py
@@ -922,10 +1033,11 @@ def hybrid_search(
     dense_vector: list[float],
     sparse_vector: SparseVector,
     query_filter: Filter | None,
+    collection: str,
     top_k: int = 20,
 ) -> list:
     results = qdrant.query_points(
-        collection_name=settings.qdrant_collection,
+        collection_name=collection,
         prefetch=[
             Prefetch(
                 query=NamedVector(name="dense", vector=dense_vector),
@@ -982,18 +1094,19 @@ This is the correct dependency direction — retrieval depends on ingestion util
 from models import NormalizedProfile
 
 def retrieve(
-    jd: NormalizedProfile,
+    profile: NormalizedProfile,
     filters: dict | None = None,
+    collection: str = settings.qdrant_collection,
     top_k: int = 20,
 ) -> list:
-    dense_vector  = embed(jd.summary)
-    sparse_vector = build_sparse_vector(jd)
+    dense_vector  = embed(profile.summary)
+    sparse_vector = build_sparse_vector(profile)
     query_filter  = build_filter(filters)
 
-    return hybrid_search(dense_vector, sparse_vector, query_filter, top_k)
+    return hybrid_search(dense_vector, sparse_vector, query_filter, collection, top_k)
 ```
 
-The function receives an already-normalized `NormalizedProfile` — normalization happens upstream in `main.py` (Step 8). This keeps retrieval focused: it does search, not parsing.
+The function receives an already-normalized `NormalizedProfile` and the target `collection`. Normalization and collection selection happen upstream in `main.py` (Step 8), which knows the search direction. This keeps retrieval focused: it does search, not routing.
 
 ---
 
@@ -1008,7 +1121,7 @@ ScoredPoint(
     score=0.031,          # RRF score — not a semantic similarity score
     payload={
         "name": "Elena García",
-        "current_role": "Senior Backend Developer",
+        "role": "Senior Backend Developer",
         "seniority": "senior",
         "summary": "Senior backend engineer with 10 years...",
         "hard_skills": ["Python", "FastAPI", "Kafka", ...],
@@ -1086,7 +1199,7 @@ Formats the JD and all 20 candidates into a single readable text block. The cand
 def _build_prompt(points: list[ScoredPoint], jd: NormalizedProfile) -> str:
     lines = [
         "JOB DESCRIPTION",
-        f"Role: {jd.current_role} ({jd.seniority})",
+        f"Role: {jd.role} ({jd.seniority})",
         f"Summary: {jd.summary}",
         f"Skills: {', '.join(jd.hard_skills)}",
         "",
@@ -1098,7 +1211,7 @@ def _build_prompt(points: list[ScoredPoint], jd: NormalizedProfile) -> str:
             "---",
             f"id: {point.id}",
             f"Name: {p.get('name', 'Unknown')}",
-            f"Role: {p.get('current_role')} ({p.get('seniority')})",
+            f"Role: {p.get('role')} ({p.get('seniority')})",
             f"Summary: {p.get('summary')}",
             f"Skills: {', '.join(p.get('hard_skills', []))}",
         ]
@@ -1117,7 +1230,7 @@ def _point_to_profile(payload: dict) -> NormalizedProfile:
     return NormalizedProfile(
         name=payload.get("name"),
         summary=payload.get("summary", ""),
-        current_role=payload.get("current_role"),
+        role=payload.get("role"),
         seniority=payload.get("seniority"),
         years_experience=payload.get("years_experience"),
         sector=payload.get("sector"),
@@ -1282,26 +1395,35 @@ Triggers the full ingestion pipeline — reads every file from `data/sample_prof
 
 #### 8.5 — `POST /search` — the main pipeline
 
-This is the only endpoint that matters for the demo. The pipeline is a four-step sequence:
+This is the only endpoint that matters for the demo. The `direction` field in `SearchRequest` controls which normalizer is called and which collection is searched. The rest of the pipeline — embed, retrieve, rerank — is identical for both directions:
 
 ```
-raw JD text
-  → normalize_job_description()  [normalizer.py]  → NormalizedProfile
-  → retrieve()                   [retrieval.py]   → list[ScoredPoint]  (top 20)
-  → rerank()                     [reranker.py]    → list[MatchResult]  (top 5)
+"job_to_candidate" (default)          "candidate_to_job"
+
+raw JD text                            raw CV text
+  → normalize_job_description()          → normalize_profile()
+  → retrieve(collection="candidates")    → retrieve(collection="jobs")
+  → rerank()                             → rerank()
+  → list[MatchResult]                    → list[MatchResult]
 ```
 
 ```python
 # backend/main.py
 @app.post("/search", response_model=list[MatchResult])
 def search(request: SearchRequest):
-    jd_profile = normalize_job_description(request.job_description)
-    points     = retrieve(jd_profile, filters=request.filters)
-    results    = rerank(points, jd_profile)
+    if request.direction == "candidate_to_job":
+        profile    = normalize_profile(request.query_text)
+        collection = settings.jobs_collection
+    else:
+        profile    = normalize_job_description(request.query_text)
+        collection = settings.qdrant_collection
+
+    points  = retrieve(profile, filters=request.filters, collection=collection)
+    results = rerank(points, profile)
     return results
 ```
 
-Four lines — one per pipeline step. `response_model=list[MatchResult]` tells FastAPI to validate and serialize the return value. If `rerank()` ever returns something that doesn't conform to `MatchResult`, FastAPI raises a 500 before it reaches the client.
+`response_model=list[MatchResult]` tells FastAPI to validate and serialize the return value. The branching is two lines — everything else is shared.
 
 ---
 
@@ -1318,7 +1440,7 @@ Four lines — one per pipeline step. `response_model=list[MatchResult]` tells F
 		"matched_skills": ["Python", "PostgreSQL", "Docker", "FastAPI"],
 		"profile": {
 			"summary": "Senior backend engineer with 7 years of experience...",
-			"current_role": "Senior Backend Engineer",
+			"role": "Senior Backend Engineer",
 			"seniority": "senior"
 		}
 	}
@@ -1327,7 +1449,99 @@ Four lines — one per pipeline step. `response_model=list[MatchResult]` tells F
 
 The `score` is now a human-readable 0.0–1.0 fit rating assigned by the LLM, replacing the raw RRF score from Qdrant.
 
-### Step 9 — Frontend (TODO)
+### Step 9 — `GET /candidates` and `GET /jobs` ✅
+
+These two endpoints let the frontend display the full catalogue of indexed candidates and jobs without requiring a search query. They use Qdrant's `scroll()` API — a paginated full-collection read that bypasses the vector index entirely.
+
+---
+
+#### 9.1 — Why `scroll()` instead of search?
+
+`search()` / `query_points()` require a query vector — they rank results by similarity. When you want to list everything (no query, no ranking), `scroll()` is the right tool. It returns points in storage order with no scoring overhead.
+
+---
+
+#### 9.2 — Adding the endpoints to `main.py`
+
+```python
+# backend/main.py
+@app.get("/candidates")
+def list_candidates():
+    try:
+        points, _ = qdrant.scroll(
+            collection_name=settings.qdrant_collection,
+            with_payload=True,
+            limit=100,
+        )
+        return [{"id": str(p.id), **p.payload} for p in points]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/jobs")
+def list_jobs():
+    try:
+        points, _ = qdrant.scroll(
+            collection_name=settings.jobs_collection,
+            with_payload=True,
+            limit=100,
+        )
+        return [{"id": str(p.id), **p.payload} for p in points]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+```
+
+`scroll()` returns a tuple of `(points, next_page_offset)`. The second element is used for pagination — for now we ignore it and cap at 100 items, which is more than enough for the sample dataset.
+
+The response for each item merges the Qdrant point `id` with the full `payload` dict into a flat object — the frontend can render it directly without needing to know the Qdrant data model.
+
+---
+
+#### 9.3 — The `qdrant` client in `main.py`
+
+The scroll calls above need a `QdrantClient` instance. Rather than creating a second client, import the one already instantiated in `retrieval.py`:
+
+```python
+# backend/main.py
+from retrieval import retrieve, qdrant
+```
+
+The client is module-level in `retrieval.py` — importing it here reuses the same connection pool.
+
+---
+
+#### 9.4 — What the responses look like
+
+```json
+// GET /candidates — example item
+{
+	"id": "uuid-...",
+	"name": "Elena García",
+	"role": "Senior Backend Engineer",
+	"seniority": "senior",
+	"years_experience": 7,
+	"location": "Madrid",
+	"open_to_remote": true,
+	"hard_skills": ["Python", "PostgreSQL", "Docker", "FastAPI"],
+	"summary": "Senior backend engineer with 7 years of experience..."
+}
+```
+
+```json
+// GET /jobs — example item
+{
+	"id": "uuid-...",
+	"role": "Lead Data Engineer",
+	"seniority": "lead",
+	"years_experience": 5,
+	"location": "Madrid",
+	"open_to_remote": false,
+	"hard_skills": ["Spark", "Airflow", "AWS Glue", "Python"],
+	"summary": "Lead data engineer role in a Madrid-based FinTech..."
+}
+```
+
+### Step 10 — Frontend (TODO)
 
 - Text area for job description input
 - Submit → call `POST /search`

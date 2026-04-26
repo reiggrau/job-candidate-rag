@@ -46,8 +46,10 @@ Rules:
 - 'hard_skills': list exact, canonical tool/technology names only (e.g. "PostgreSQL",
   not "databases"). List only what is explicitly stated — do NOT infer or expand.
 - 'seniority': must be one of: junior | mid | senior | lead | executive
-- 'name': extract the candidate's full name if present.
-- If a field cannot be determined, use null for strings, [] for arrays, false for booleans.
+- 'name': extract the candidate's full name if present; null if not found.
+- 'years_experience': REQUIRED — must be a number, never null. If not stated explicitly,
+  calculate from career dates (sum all role durations). If truly indeterminate, use 0.
+- For all other fields: use null for strings, [] for arrays, false for booleans if unknown.
 """
 
 JD_SYSTEM_PROMPT = f"""
@@ -68,8 +70,11 @@ Rules:
 - 'hard_skills': list exact, canonical tool/technology names only (e.g. "React",
   not "frontend frameworks"). List only what is explicitly required or preferred.
 - 'seniority': must be one of: junior | mid | senior | lead | executive
-- 'name': always null for job descriptions.
-- If a field cannot be determined, use null for strings, [] for arrays, false for booleans.
+- 'name': extract the hiring company's name if stated; otherwise null.
+- 'years_experience': REQUIRED — must be a number, never null. Use the minimum years
+  stated in the requirements (e.g. "5+ years" → 5). If not stated, infer from seniority
+  (junior=1, mid=3, senior=5, lead=7, executive=10). Never return null.
+- For all other fields: use null for strings, [] for arrays, false for booleans if unknown.
 """
 
 

@@ -1,29 +1,32 @@
 """Models for the job-candidate-rag application."""
 
-from typing import Optional
+from typing import Optional, Literal
 from pydantic import BaseModel
 
 
 class NormalizedProfile(BaseModel):
     """Standardized candidate profile used for embedding and matching."""
-    name: Optional[str] = None  # candidate only — null for JDs
-    summary: str                # clean English prose — used for embedding
-    current_role: str
-    seniority: str              # junior | mid | senior | lead | executive
-    years_experience: float
-    sector: list[str]
-    hard_skills: list[str]      # exact tool/technology names
-    soft_skills: list[str]
-    languages: list[str]
-    location: str
-    open_to_remote: bool
-    education: str
+    name: Optional[str] = None            # candidate's full name or hiring company name
+    summary: str                          # clean English prose — used for embedding
+    role: Optional[str] = None
+    # junior | mid | senior | lead | executive
+    seniority: Optional[str] = None
+    years_experience: float  # required — estimate from career dates if not explicit
+    sector: list[str] = []
+    hard_skills: list[str] = []           # exact tool/technology names
+    soft_skills: list[str] = []
+    languages: list[str] = []
+    location: Optional[str] = None
+    open_to_remote: Optional[bool] = None
+    education: Optional[str] = None
 
 
 class SearchRequest(BaseModel):
     """Input for the search endpoint."""
-    job_description: str            # raw JD text — any format, any language
-    filters: Optional[dict] = None  # optional metadata pre-filters
+    query_text: str                          # raw CV or JD text — any format, any language
+    direction: Literal["job_to_candidate",
+                       "candidate_to_job"] = "job_to_candidate"
+    filters: Optional[dict] = None           # optional metadata pre-filters
 
 
 class MatchResult(BaseModel):
@@ -58,7 +61,7 @@ PROFILE_EXAMPLE_OUTPUT = NormalizedProfile(
         "and Docker. Currently working in a high-scale food delivery environment. "
         "Based in Barcelona, fluent in Spanish and English."
     ),
-    current_role="Senior Backend Developer",
+    role="Senior Backend Developer",
     seniority="senior",
     years_experience=10,
     sector=["food delivery", "e-commerce"],
@@ -82,11 +85,12 @@ JD_EXAMPLE_OUTPUT = NormalizedProfile(
         "cloud-native ETL tooling such as AWS Glue or Azure Data Factory. Based in Madrid, "
         "fluent in Spanish."
     ),
-    current_role="Senior Data Engineer",
+    role="Senior Data Engineer",
     seniority="senior",
     years_experience=5,
     sector=[],
-    hard_skills=["Apache Spark", "Python", "Airflow", "AWS Glue", "Azure Data Factory"],
+    hard_skills=["Apache Spark", "Python",
+                 "Airflow", "AWS Glue", "Azure Data Factory"],
     soft_skills=[],
     languages=["Spanish", "English"],
     location="Madrid",

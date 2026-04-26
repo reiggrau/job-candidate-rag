@@ -1,6 +1,24 @@
-import type { MatchResult, SearchRequest } from './types';
+import type { Profile, MatchResult, SearchRequest } from './types';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8000';
+
+export async function getJobs() {
+	fetch(`${API_BASE}/jobs`)
+		.then((response) => response.json())
+		.catch((error) => {
+			console.error('Error fetching jobs:', error);
+			throw error;
+		});
+}
+
+export async function getCandidates(): Promise<Profile[]> {
+	const response = await fetch(`${API_BASE}/candidates`);
+	if (!response.ok) {
+		const detail = await response.text();
+		throw new Error(detail);
+	}
+	return response.json();
+}
 
 export async function search(payload: SearchRequest): Promise<MatchResult[]> {
 	const response = await fetch(`${API_BASE}/search`, {
