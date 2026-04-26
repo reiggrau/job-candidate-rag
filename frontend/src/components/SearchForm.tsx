@@ -3,19 +3,26 @@ import { search } from '../api';
 import { ResultCard } from '../ResultCard';
 import type { MatchResult } from '../types';
 
-export default function SearchForm() {
-	const [jd, setJd] = useState('');
+interface SearchFormProps {
+	description: string;
+	onDescriptionChange: (value: string) => void;
+}
+
+export default function SearchForm({
+	description,
+	onDescriptionChange,
+}: SearchFormProps) {
 	const [results, setResults] = useState<MatchResult[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	async function handleSubmit(e: React.SubmitEvent) {
 		e.preventDefault();
-		if (!jd.trim()) return;
+		if (!description.trim()) return;
 		setLoading(true);
 		setError(null);
 		try {
-			const data = await search({ job_description: jd });
+			const data = await search({ job_description: description });
 			setResults(data);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Unknown error');
@@ -25,7 +32,7 @@ export default function SearchForm() {
 	}
 
 	return (
-		<div id="SearchForm" className="min-h-screen px-4 py-12">
+		<div id="SearchForm" className="flex-grow min-h-screen px-4 py-12">
 			<div className="mx-auto max-w-2xl space-y-8">
 				<h1 className="text-3xl font-bold text-gray-900">Candidate Search</h1>
 
@@ -34,13 +41,13 @@ export default function SearchForm() {
 						className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
 						rows={6}
 						placeholder="Paste a job description..."
-						value={jd}
-						onChange={(e) => setJd(e.target.value)}
+						value={description}
+						onChange={(e) => onDescriptionChange(e.target.value)}
 					/>
 					{/* Phase B: filter panel goes here */}
 					<button
 						type="submit"
-						disabled={loading || !jd.trim()}
+						disabled={loading || !description.trim()}
 						className="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
 					>
 						{loading ? 'Searching…' : 'Search'}

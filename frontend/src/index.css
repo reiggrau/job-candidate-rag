@@ -17,6 +17,8 @@
 	--sans: system-ui, 'Segoe UI', Roboto, sans-serif;
 	--heading: system-ui, 'Segoe UI', Roboto, sans-serif;
 	--mono: ui-monospace, Consolas, monospace;
+
+	--header-height: 3rem;
 }
 
 /* DARK MODE THEME */
@@ -90,4 +92,12 @@ button {
 		width: 20px;
 		filter: invert(1) brightness(2);
 	}
+}
+
+#Header {
+	height: var(--header-height);
+}
+
+#Dashboard {
+	padding-top: var(--header-height);
 }
