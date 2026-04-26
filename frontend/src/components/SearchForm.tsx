@@ -1,66 +1,49 @@
 import { useState } from 'react';
-import { search } from '../api';
-import { ResultCard } from '../ResultCard';
-import type { MatchResult } from '../types';
+import type { Profile } from '../types';
 
 interface SearchFormProps {
-	description: string;
-	onDescriptionChange: (value: string) => void;
+	selectedItem: Profile | null;
+	handleSearch: (description: string) => Promise<void>;
 }
 
 export default function SearchForm(props: SearchFormProps) {
-	const { description, onDescriptionChange } = props;
+	const { selectedItem, handleSearch } = props;
 
-	const [results, setResults] = useState<MatchResult[]>([]);
+	const [description, setDescription] = useState(
+		selectedItem ? selectedItem.summary : '',
+	);
+
 	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-
-	async function handleSubmit(e: React.SubmitEvent) {
-		e.preventDefault();
-		if (!description.trim()) return;
-		setLoading(true);
-		setError(null);
-		try {
-			const data = await search({ job_description: description });
-			setResults(data);
-		} catch (err) {
-			setError(err instanceof Error ? err.message : 'Unknown error');
-		} finally {
-			setLoading(false);
-		}
-	}
 
 	return (
-		<div id="SearchForm" className="flex-grow min-h-screen px-4 py-12">
-			<div className="mx-auto max-w-2xl space-y-8">
-				<h1 className="text-3xl font-bold text-gray-900">Candidate Search</h1>
+		<div id="SearchForm" className="flex-grow flex flex-col bg-yellow-200 p-4">
+			<h1 className="text-3xl font-bold text-gray-900">Candidate Search</h1>
 
-				<form onSubmit={handleSubmit} className="space-y-4">
-					<textarea
-						className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-						rows={6}
-						placeholder="Paste a job description..."
-						value={description}
-						onChange={(e) => onDescriptionChange(e.target.value)}
-					/>
-					{/* Phase B: filter panel goes here */}
-					<button
-						type="submit"
-						disabled={loading || !description.trim()}
-						className="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-					>
-						{loading ? 'Searching…' : 'Search'}
-					</button>
-				</form>
-
-				{error && <p className="text-sm text-red-600">{error}</p>}
-
-				<div className="space-y-4">
-					{results.map((r) => (
-						<ResultCard key={r.candidate_id} result={r} />
-					))}
-				</div>
-			</div>
+			<form
+				onSubmit={async (e) => {
+					e.preventDefault();
+					setLoading(true);
+					await handleSearch(description);
+					setLoading(false);
+				}}
+				className="space-y-4"
+			>
+				<textarea
+					className=""
+					rows={6}
+					placeholder="Paste a job description..."
+					value={description}
+					onChange={(e) => setDescription(e.target.value)}
+				/>
+				{/* Phase B: filter panel goes here */}
+				<button
+					type="submit"
+					disabled={loading || !description.trim()}
+					className="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+				>
+					{loading ? 'Searching…' : 'Search'}
+				</button>
+			</form>
 		</div>
 	);
 }

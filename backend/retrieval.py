@@ -1,5 +1,5 @@
 from qdrant_client.models import (Filter, FieldCondition, MatchValue, Range,
-                                  Prefetch, Query, Fusion, NamedVector, NamedSparseVector, SparseVector)
+                                  Prefetch, FusionQuery, Fusion, SparseVector)
 from qdrant_client import QdrantClient
 from ingestion import embed, build_sparse_vector
 from models import NormalizedProfile
@@ -49,22 +49,19 @@ def hybrid_search(
         collection_name=collection,
         prefetch=[
             Prefetch(
-                query=NamedVector(name="dense", vector=dense_vector),
+                query=dense_vector,
                 using="dense",
                 filter=query_filter,
                 limit=top_k * 2,   # fetch more, RRF will trim
             ),
             Prefetch(
-                query=NamedSparseVector(
-                    name="sparse",
-                    vector=sparse_vector,
-                ),
+                query=sparse_vector,
                 using="sparse",
                 filter=query_filter,
                 limit=top_k * 2,
             ),
         ],
-        query=Query(fusion=Fusion.RRF),
+        query=FusionQuery(fusion=Fusion.RRF),
         limit=top_k,
         with_payload=True,
     )

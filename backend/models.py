@@ -31,7 +31,7 @@ class SearchRequest(BaseModel):
 
 class MatchResult(BaseModel):
     """Output for the search endpoint."""
-    candidate_id: str
+    id: str
     name: Optional[str] = None
     score: float                  # 0.0 – 1.0
     reasoning: str                # LLM-generated explanation

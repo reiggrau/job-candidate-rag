@@ -6,7 +6,7 @@ from config import settings
 
 
 class _RerankItem(PydanticModel):
-    candidate_id: str
+    id: str
     score: float
     reasoning: str
     matched_skills: list[str]
@@ -23,7 +23,7 @@ RERANK_SYSTEM_PROMPT = """You are a talent matching expert.
 Given a job description and a list of candidates, score each candidate's fit from 0.0 to 1.0.
 
 Order results highest score first. For each candidate provide:
-  candidate_id: copy exactly from the input
+  id: copy exactly from the input
   score: float 0.0–1.0
   reasoning: one sentence, third-person, impersonal
   matched_skills: skills present in both the JD and the candidate"""
@@ -94,9 +94,9 @@ def rerank(
 
     results = []
     for item in items[:top_n]:
-        payload = payload_by_id.get(item.candidate_id, {})
+        payload = payload_by_id.get(item.id, {})
         results.append(MatchResult(
-            candidate_id=item.candidate_id,
+            id=item.id,
             name=payload.get("name", "Unknown"),
             score=item.score,
             reasoning=item.reasoning,

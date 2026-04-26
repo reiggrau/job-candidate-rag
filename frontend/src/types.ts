@@ -10,9 +10,7 @@ export interface Profile {
 	summary: string;
 }
 
-export interface MatchResult {
-	candidate_id: string;
-	name: string;
+export interface MatchResult extends Profile {
 	score: number;
 	reasoning: string;
 	matched_skills: string[];
@@ -20,6 +18,7 @@ export interface MatchResult {
 }
 
 export interface SearchRequest {
-	job_description: string;
+	query_text: string;
+	direction: 'job_to_candidate' | 'candidate_to_job';
 	filters?: Record<string, unknown>;
 }
