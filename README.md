@@ -368,7 +368,7 @@ class SearchRequest(BaseModel):
 
 
 class MatchResult(BaseModel):
-    candidate_id: str
+    id: str
     name: Optional[str] = None
     score: float                      # 0.0 – 1.0, assigned by LLM reranker
     reasoning: str                    # LLM-generated explanation
@@ -1160,7 +1160,7 @@ Two internal models (prefixed with `_` to signal they are private to the module)
 from pydantic import BaseModel as PydanticModel
 
 class _RerankItem(PydanticModel):
-    candidate_id: str
+    id: str
     score: float
     reasoning: str
     matched_skills: list[str]
@@ -1180,7 +1180,7 @@ RERANK_SYSTEM_PROMPT = """You are a talent matching expert.
 Given a job description and a list of candidates, score each candidate's fit from 0.0 to 1.0.
 
 Order results highest score first. For each candidate provide:
-  candidate_id: copy exactly from the input
+  id: copy exactly from the input
   score: float 0.0–1.0
   reasoning: one sentence, third-person, impersonal
   matched_skills: skills present in both the JD and the candidate"""
@@ -1275,9 +1275,9 @@ def rerank(
 
     results = []
     for item in items[:top_n]:
-        payload = payload_by_id.get(item.candidate_id, {})
+        payload = payload_by_id.get(item.id, {})
         results.append(MatchResult(
-            candidate_id=item.candidate_id,
+            id=item.id,
             name=payload.get("name", "Unknown"),
             score=item.score,
             reasoning=item.reasoning,
@@ -1433,7 +1433,7 @@ def search(request: SearchRequest):
 // POST /search — example response
 [
 	{
-		"candidate_id": "uuid-...",
+		"id": "uuid-...",
 		"name": "Elena García",
 		"score": 0.91,
 		"reasoning": "Candidate has extensive backend experience with Python and PostgreSQL, directly matching the FinTech role requirements.",
@@ -1566,6 +1566,30 @@ curl -X POST http://localhost:8000/ingest
 curl -X POST http://localhost:8000/search \
   -H "Content-Type: application/json" \
   -d '{"job_description": "Senior Python engineer with Kubernetes experience in Barcelona"}'
+```
+
+## Setup (separate)
+
+### Qdrant
+
+```bash
+cd job-candidate-rag
+docker compose up qdrant # Start Docker first
+```
+
+### Backend
+
+```bash
+cd job-candidate-rag/backend
+source .venv/Scripts/activate # Activate .venv
+uvicorn main:app --reload
+```
+
+### Frontend
+
+```bash
+cd job-candidate-rag/frontend
+npm run dev
 ```
 
 ---

@@ -16,7 +16,10 @@ export default function SearchForm(props: SearchFormProps) {
 	const [loading, setLoading] = useState(false);
 
 	return (
-		<div id="SearchForm" className="flex-grow flex flex-col bg-yellow-200 p-4">
+		<div
+			id="SearchForm"
+			className="flex-grow flex flex-col p-4 border-r border-[var(--border)]"
+		>
 			<h1 className="text-3xl font-bold text-gray-900">Candidate Search</h1>
 
 			<form

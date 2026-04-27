@@ -11,6 +11,7 @@ export default function Dashboard() {
 	const [candidates, setCandidates] = useState<Profile[]>([]);
 
 	const [searchMode, setSearchMode] = useState<'Jobs' | 'Candidates'>('Jobs');
+	const [isFetching, setIsFetching] = useState(true);
 
 	const [selectedItem, setSelectedItem] = useState<Profile | null>(null);
 
@@ -35,29 +36,33 @@ export default function Dashboard() {
 	}
 
 	useEffect(() => {
-		console.log('Dashboard mounted. Fetching initial data...');
-
-		async function fetchInitialData() {
+		console.log('Search mode changed. Fetching data...');
+		async function fetchData(searchMode: 'Jobs' | 'Candidates') {
+			setIsFetching(true);
 			try {
-				const jobs = await getJobs();
-				console.log('Fetched jobs:', jobs);
-				setJobs(jobs);
-
-				const candidates = await getCandidates();
-				console.log('Fetched candidates:', candidates);
-				setCandidates(candidates);
+				if (searchMode === 'Jobs') {
+					const jobs = await getJobs();
+					console.log('Fetched jobs:', jobs);
+					setJobs(jobs);
+				} else {
+					const candidates = await getCandidates();
+					console.log('Fetched candidates:', candidates);
+					setCandidates(candidates);
+				}
 			} catch (error) {
-				console.error('Error fetching initial data:', error);
+				console.error('Error fetching data:', error);
 			}
 		}
 
-		fetchInitialData();
-	}, []);
+		fetchData(searchMode).finally(() => setIsFetching(false));
+	}, [searchMode]);
 
 	return (
-		<div id="Dashboard" className="flex bg-red-500">
+		<div id="Dashboard" className="h-full flex pt-[var(--header-height)]">
 			<CardList
-				title={searchMode === 'Jobs' ? 'Job Openings' : 'Candidates'}
+				isFetching={isFetching}
+				searchMode={searchMode}
+				setSearchMode={setSearchMode}
 				items={searchMode === 'Jobs' ? jobs : candidates}
 				onSelect={(item) => {
 					console.log('Selected item:', item);

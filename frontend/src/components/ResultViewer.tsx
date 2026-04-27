@@ -8,7 +8,7 @@ export default function ResultViewer(props: ResultViewerProps) {
 	const { result } = props;
 
 	return (
-		<div id="ResultViewer" className="flex-grow bg-yellow-200 p-4">
+		<div id="ResultViewer" className="flex-grow p-4">
 			{result ? (
 				<>
 					<h1>{result.name}</h1>

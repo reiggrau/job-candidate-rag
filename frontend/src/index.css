@@ -54,7 +54,6 @@ h5,
 h6 {
 	font-family: var(--heading);
 	color: var(--text-h);
-	cursor: default;
 }
 
 h1 {
@@ -92,12 +91,4 @@ button {
 		width: 20px;
 		filter: invert(1) brightness(2);
 	}
-}
-
-#Header {
-	height: var(--header-height);
-}
-
-#Dashboard {
-	padding-top: var(--header-height);
 }

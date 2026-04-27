@@ -3,7 +3,7 @@ import Dashboard from './components/Dashboard';
 
 function App() {
 	return (
-		<div id="App" className="flex flex-col">
+		<div id="App" className="h-full flex flex-col">
 			<Header />
 			<Dashboard />
 		</div>
