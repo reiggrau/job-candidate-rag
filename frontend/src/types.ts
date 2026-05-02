@@ -1,3 +1,5 @@
+export type SearchMode = 'Jobs' | 'Candidates';
+
 export interface Profile {
 	id: string;
 	name?: string | null;

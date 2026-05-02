@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
-import type { MatchResult, Profile } from '../types';
-import CardList from './CardList';
-import SearchForm from './SearchForm';
-import ResultViewer from './ResultViewer';
 import { getCandidates, getJobs, search } from '../api';
-import ResultsList from './ResultsList';
+import type { MatchResult, Profile, SearchMode } from '../types';
+import Header from './Header';
+import CandidateSearch from './CandidateSearch';
+import Footer from './Footer';
 
 export default function Dashboard() {
 	const [jobs, setJobs] = useState<Profile[]>([]);
 	const [candidates, setCandidates] = useState<Profile[]>([]);
 
-	const [searchMode, setSearchMode] = useState<'Jobs' | 'Candidates'>('Jobs');
+	const [searchMode, setSearchMode] = useState<SearchMode>('Candidates');
 	const [isFetching, setIsFetching] = useState(true);
 
 	const [selectedItem, setSelectedItem] = useState<Profile | null>(null);
@@ -25,7 +24,7 @@ export default function Dashboard() {
 			const results = await search({
 				query_text: description,
 				direction:
-					searchMode === 'Jobs' ? 'job_to_candidate' : 'candidate_to_job',
+					searchMode === 'Jobs' ? 'candidate_to_job' : 'job_to_candidate',
 			});
 			console.log('Search results:', results);
 			setResults(results);
@@ -37,10 +36,10 @@ export default function Dashboard() {
 
 	useEffect(() => {
 		console.log('Search mode changed. Fetching data...');
-		async function fetchData(searchMode: 'Jobs' | 'Candidates') {
+		async function fetchData(searchMode: SearchMode) {
 			setIsFetching(true);
 			try {
-				if (searchMode === 'Jobs') {
+				if (searchMode === 'Candidates') {
 					const jobs = await getJobs();
 					console.log('Fetched jobs:', jobs);
 					setJobs(jobs);
@@ -58,31 +57,28 @@ export default function Dashboard() {
 	}, [searchMode]);
 
 	return (
-		<div id="Dashboard" className="h-full flex pt-[var(--header-height)]">
-			<CardList
-				isFetching={isFetching}
-				searchMode={searchMode}
-				setSearchMode={setSearchMode}
-				items={searchMode === 'Jobs' ? jobs : candidates}
-				onSelect={(item) => {
-					console.log('Selected item:', item);
-					setSelectedItem(item);
-				}}
-			/>
-			<SearchForm
-				key={selectedItem?.id ?? 'none'}
-				selectedItem={selectedItem}
-				handleSearch={searchMatches}
-			/>
-			<ResultViewer result={selectedResult} />
-			<ResultsList
-				title="Search Results"
-				results={results}
-				onSelect={(result) => {
-					console.log('Selected result:', result);
-					setSelectedResult(result);
-				}}
-			/>
+		<div id="Dashboard" className="h-full">
+			<Header searchMode={searchMode} setSearchMode={setSearchMode} />
+			{/* <QuickAccess
+					isFetching={isFetching}
+					items={searchMode === 'Jobs' ? candidates : jobs}
+					selectedItem={selectedItem}
+					setSelectedItem={setSelectedItem}
+				/> */}
+			<main className="h-full w-full pt-[var(--header-height)] pb-[var(--footer-height)]">
+				<CandidateSearch
+					key={selectedItem?.id ?? 'none'}
+					selectedItem={selectedItem}
+					setSelectedItem={setSelectedItem}
+					handleSearch={searchMatches}
+				/>
+			</main>
+			{/* <ResultsList
+					title="Search Results"
+					results={results}
+					setSelectedResult={setSelectedResult}
+				/> */}
+			<Footer />
 		</div>
 	);
 }

@@ -2,44 +2,70 @@
 
 /* THEME */
 :root {
+	--header-color: #005d83;
+	--main-button-color: #005d83;
 	--text: #6b6375;
-	--text-h: #08060d;
+	--text-h: #272727;
 	--bg: #fff;
+	--bg-highlight: #f4f3ec;
 	--border: #e5e4e7;
 	--code-bg: #f4f3ec;
-	--accent: #aa3bff;
-	--accent-bg: rgba(170, 59, 255, 0.1);
-	--accent-border: rgba(170, 59, 255, 0.5);
+	--accent: #0081b4;
+	--accent-bg: rgba(0, 129, 180, 0.1);
+	--accent-border: rgba(0, 129, 180, 0.5);
 	--social-bg: rgba(244, 243, 236, 0.5);
+	--error: #ff4d4f;
 	--shadow:
 		rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-	--sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-	--heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+	--sans: Roboto, sans-serif;
+	--heading: Roboto, sans-serif;
 	--mono: ui-monospace, Consolas, monospace;
 
-	--header-height: 3rem;
+	--header-height: 4rem;
+	--footer-height: 3rem;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 3px;
+	}
+
+	&::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.4);
+	}
+
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 /* DARK MODE THEME */
-@media (prefers-color-scheme: dark) {
-	:root {
-		--text: #9ca3af;
-		--text-h: #f3f4f6;
-		--bg: #16171d;
-		--border: #2e303a;
-		--code-bg: #1f2028;
-		--accent: #c084fc;
-		--accent-bg: rgba(192, 132, 252, 0.15);
-		--accent-border: rgba(192, 132, 252, 0.5);
-		--social-bg: rgba(47, 48, 58, 0.5);
-		--shadow:
-			rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-	}
+:root.dark {
+	--text: #9ca3af;
+	--text-h: #f3f4f6;
+	--bg: #16171d;
+	--bg-highlight: #1f2028;
+	--border: #2e303a;
+	--code-bg: #1f2028;
+	--accent: #0081b4;
+	--accent-bg: rgba(0, 129, 180, 0.15);
+	--accent-border: rgba(0, 129, 180, 0.5);
+	--social-bg: rgba(47, 48, 58, 0.5);
+	--error: #d34345;
+	--shadow:
+		rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 }
 
 #root {
 	height: 100vh;
+	overflow: hidden;
 	box-sizing: border-box;
 	color: var(--text);
 	background: var(--bg);
@@ -52,18 +78,50 @@ h3,
 h4,
 h5,
 h6 {
-	font-family: var(--heading);
+	font-family: var(--sans);
 	color: var(--text-h);
 }
 
 h1 {
-	font-weight: 500;
+	font-weight: 600;
 	font-size: 2rem;
-	letter-spacing: -1px;
+	letter-spacing: -0.04em;
+}
+
+h2 {
+	font-weight: 600;
+	font-size: 1.5rem;
+	letter-spacing: -0.02em;
 }
 
 h3 {
+	font-weight: 500;
+	font-size: 1.25rem;
+	letter-spacing: -0.01em;
+}
+
+h4 {
+	font-weight: 500;
+	font-size: 1rem;
+	letter-spacing: 0;
+}
+
+h5 {
+	font-weight: 400;
+	font-size: 0.8125rem;
+	letter-spacing: 0.02em;
+}
+
+h6 {
 	font-weight: 300;
+	font-size: 0.75rem;
+	letter-spacing: 0.03em;
+	color: var(--text);
+}
+
+p {
+	font-size: 14px;
+	line-height: 1.5;
 }
 
 button {
@@ -91,4 +149,34 @@ button {
 		width: 20px;
 		filter: invert(1) brightness(2);
 	}
+}
+
+textarea {
+	font-family: var(--sans);
+	color: var(--text);
+	background: var(--code-bg);
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	padding: 10px;
+	resize: none;
+	transition: all 0.3s;
+
+	&:focus {
+		outline: none;
+		border-color: var(--accent-border);
+		box-shadow: 0 0 0 2px var(--accent-bg);
+	}
+}
+
+@keyframes spin-out {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@theme {
+	--animate-spin-out: spin-out 1s ease-out forwards;
 }
