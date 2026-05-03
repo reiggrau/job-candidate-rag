@@ -38,6 +38,7 @@ export default function Results(props: ResultsProps) {
 						<ResultCard
 							key={result.id}
 							result={result}
+							searchMode={searchMode}
 							selectedResult={selectedResult}
 							onSelect={() => setSelectedResult(result)}
 						/>

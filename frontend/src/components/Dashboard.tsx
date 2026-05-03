@@ -18,7 +18,7 @@ export default function Dashboard() {
 	const [selectedItem, setSelectedItem] = useState<Profile | null>(null);
 
 	const [results, setResults] = useState<MatchResult[]>([]);
-	const [isResultsOpen, setIsResultsOpen] = useState(true);
+	const [isResultsOpen, setIsResultsOpen] = useState(false);
 	const [selectedResult, setSelectedResult] = useState<MatchResult | null>(
 		null,
 	);

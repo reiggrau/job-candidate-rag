@@ -69,7 +69,7 @@ def search(request: SearchRequest):
 
         points = retrieve(profile, filters=request.filters,
                           collection=collection)
-        results = rerank(points, profile)
+        results = rerank(points, profile, direction=request.direction)
         return results
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

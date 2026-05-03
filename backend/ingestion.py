@@ -49,7 +49,7 @@ def term_to_index(term: str) -> int:
 def build_sparse_vector(profile: NormalizedProfile) -> SparseVector:
     """Build a sparse vector from the candidate's skills."""
     weighted = expand_skills_weighted(
-        profile.hard_skills + [profile.role]
+        profile.hard_skills + ([profile.role] if profile.role else [])
     )  # e.g. {"React": 1.0, "JavaScript": 1.0, "Vue": 0.6, "Angular": 0.5}
     indices = [term_to_index(term) for term in weighted]
     values = [float(weight) for weight in weighted.values()]
@@ -96,9 +96,11 @@ def upsert_profile(profile: NormalizedProfile, candidate_id: str) -> None:
                     "years_experience": profile.years_experience,
                     "sector":           profile.sector,
                     "hard_skills":      profile.hard_skills,
+                    "soft_skills":      profile.soft_skills,
                     "languages":        profile.languages,
                     "location":         profile.location,
                     "open_to_remote":   profile.open_to_remote,
+                    "education":        profile.education,
                     "summary":          profile.summary,   # stored for reranker
                 },
             )
@@ -127,9 +129,11 @@ def upsert_job(profile: NormalizedProfile, job_id: str) -> None:
                     "years_experience": profile.years_experience,
                     "sector":           profile.sector,
                     "hard_skills":      profile.hard_skills,
+                    "soft_skills":      profile.soft_skills,
                     "languages":        profile.languages,
                     "location":         profile.location,
                     "open_to_remote":   profile.open_to_remote,
+                    "education":        profile.education,
                     "summary":          profile.summary,
                 },
             )

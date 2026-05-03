@@ -6,16 +6,16 @@ from pydantic import BaseModel
 
 class NormalizedProfile(BaseModel):
     """Standardized candidate profile used for embedding and matching."""
-    name: str                             # candidate's full name or hiring company name
-    role: str                             # e.g. "Senior Backend Developer"
-    seniority: str                        # junior | mid | senior | lead | executive
-    years_experience: float               # computed from work history
+    name: Optional[str] = None            # candidate's full name or hiring company name
+    years_experience: Optional[float] = None  # computed from work history
+    seniority: Optional[str] = None  # junior | mid | senior | lead
+    role: Optional[str] = None            # e.g. "Senior Backend Developer"
     sector: list[str] = []
     hard_skills: list[str] = []           # exact tool/technology names
     soft_skills: list[str] = []
     languages: list[str] = []
-    location: str                         # city or region
-    open_to_remote: bool                  # True | False
+    location: Optional[str] = None        # city or region
+    open_to_remote: Optional[bool] = None  # True | False | None if unknown
     education: Optional[str] = None
     summary: str                          # written last — uses all fields above
 
@@ -31,11 +31,11 @@ class SearchRequest(BaseModel):
 class MatchResult(BaseModel):
     """Output for the search endpoint."""
     id: str
-    name: str
     score: float                  # 0.0 – 1.0
-    reasoning: str                # LLM-generated explanation
+    name: Optional[str] = None
     matched_skills: list[str]
     profile: NormalizedProfile
+    reasoning: str                # LLM-generated explanation
 
 
 # ---------------------------------------------------------------------------
@@ -77,7 +77,7 @@ Requisitos: 5+ años con Spark, Python, Airflow. Experiencia con AWS Glue o Azur
 Español fluido imprescindible, inglés valorado."""
 
 JD_EXAMPLE_OUTPUT = NormalizedProfile(
-    name="Unknown Company",
+    name=None,
     summary=(
         "Senior data engineer with at least 5 years of experience building and orchestrating "
         "large-scale data pipelines using Apache Spark, Python, and Airflow. Experienced with "

@@ -42,6 +42,7 @@ export default function QuickAccess(props: QuickAccessProps) {
 						<ItemCard
 							key={item.id}
 							item={item}
+							searchMode={searchMode}
 							selectedItem={selectedItem}
 							onSelect={() => setSelectedItem(item)}
 						/>

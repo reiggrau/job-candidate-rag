@@ -37,18 +37,20 @@ Extract the candidate's information and return ONLY a JSON object matching this 
 {SCHEMA}
 
 Rules:
-- 'years_experience': Follow these steps:
-  1. List every role with its start and end date, compute its duration.
-  2. For roles in the SAME field as the candidate's current career, multiply by 1.0.
-  3. For roles in a DIFFERENT field (e.g. architecture, teaching, sales, law), multiply by 0.5.
-  4. Sum ALL values. No role may be skipped.
-  Do NOT use (latest_year - earliest_year). Do NOT count only tech/software roles.
-  Example: architect 2014–2022 (8yr × 0.5 = 4.0) + bootcamp 2022–2023 (0.6 × 1.0 = 0.6)
-  + dev 2023–2024 (1.2 × 1.0 = 1.2) + dev 2024–2026 (1.5 × 1.0 = 1.5) → total = 7.3
+- 'years_experience': total professional experience in years (all roles, all fields).
+  Sum the actual duration of every role listed. Do NOT skip roles, do NOT weight by field.
+  Do NOT use (latest_year - earliest_year) — calculate each role's duration individually.
+  Example: architect 2014–2022 (8.0) + bootcamp 2022–2023 (0.6) + dev 2023–2025 (2.0) → 10.6
   If truly indeterminate (no dates, no roles), use 0.
 - 'hard_skills': list exact, canonical tool/technology names only (e.g. "PostgreSQL",
   not "databases"). List only what is explicitly stated — do NOT infer or expand.
 - 'seniority': must be one of: junior | mid | senior | lead | executive
+  Base this ONLY on experience in the candidate's CURRENT field, not total career length.
+  A career-changer with 10 years in architecture and 3 years in software is mid, not senior.
+  Rough guide (field-specific years): junior <2 | mid 2–5 | senior 5–10 | lead 8+ (people/tech leadership) | executive (VP/C-level)
+- 'role': always prefix with the capitalised seniority level, e.g. "Senior Backend Developer",
+  "Junior UX Designer", "Lead Data Engineer". Never include seniority twice.
+  Use "Mid" for mid-level (not "Mid-level" or "Intermediate").
 - 'name': extract the candidate's full name if present; null if not found.
 - For all other fields: use null for strings, [] for arrays, false for booleans if unknown.
 - 'summary': WRITE THIS LAST. By now you have already set name, role, seniority,
@@ -79,6 +81,11 @@ Rules:
 - 'hard_skills': list exact, canonical tool/technology names only (e.g. "React",
   not "frontend frameworks"). List only what is explicitly required or preferred.
 - 'seniority': must be one of: junior | mid | senior | lead | executive
+  Base this on experience in the target field, not just years_experience total.
+  Rough guide (field-specific years): junior <2 | mid 2–5 | senior 5–10 | lead 8+ (people/tech leadership) | executive (VP/C-level)
+- 'role': always prefix with the capitalised seniority level, e.g. "Senior Data Engineer",
+  "Mid Product Designer", "Lead Platform Engineer". Never include seniority twice.
+  Use "Mid" for mid-level (not "Mid-level" or "Intermediate").
 - 'name': extract the hiring company's name if stated; otherwise null.
 - 'years_experience': REQUIRED — must be a number, never null. Use the minimum years
   stated in the requirements (e.g. "5+ years" → 5). If not stated, infer from seniority
