@@ -37,19 +37,28 @@ Extract the candidate's information and return ONLY a JSON object matching this 
 {SCHEMA}
 
 Rules:
-- 'summary': write a dense, fluent English paragraph (4–6 sentences) in impersonal
-  third-person describing the candidate as a professional. Do NOT use first-person ("I",
-  "my") or second-person ("you", "your"). Frame it as a description of a person:
-  e.g. "Senior backend engineer with 7 years of experience building financial APIs in
-  Python and Go, with deep expertise in PostgreSQL and AWS, based in Barcelona."
-  This field is used for semantic embedding — make it information-dense, not generic.
+- 'years_experience': Follow these steps:
+  1. List every role with its start and end date, compute its duration.
+  2. For roles in the SAME field as the candidate's current career, multiply by 1.0.
+  3. For roles in a DIFFERENT field (e.g. architecture, teaching, sales, law), multiply by 0.5.
+  4. Sum ALL values. No role may be skipped.
+  Do NOT use (latest_year - earliest_year). Do NOT count only tech/software roles.
+  Example: architect 2014–2022 (8yr × 0.5 = 4.0) + bootcamp 2022–2023 (0.6 × 1.0 = 0.6)
+  + dev 2023–2024 (1.2 × 1.0 = 1.2) + dev 2024–2026 (1.5 × 1.0 = 1.5) → total = 7.3
+  If truly indeterminate (no dates, no roles), use 0.
 - 'hard_skills': list exact, canonical tool/technology names only (e.g. "PostgreSQL",
   not "databases"). List only what is explicitly stated — do NOT infer or expand.
 - 'seniority': must be one of: junior | mid | senior | lead | executive
 - 'name': extract the candidate's full name if present; null if not found.
-- 'years_experience': REQUIRED — must be a number, never null. If not stated explicitly,
-  calculate from career dates (sum all role durations). If truly indeterminate, use 0.
 - For all other fields: use null for strings, [] for arrays, false for booleans if unknown.
+- 'summary': WRITE THIS LAST. By now you have already set name, role, seniority,
+  years_experience, hard_skills, location, and languages — use all of them.
+  Use the exact years_experience value already set — do not re-estimate.
+  Write a dense, fluent English paragraph (4–6 sentences) in impersonal third-person.
+  Do NOT use first-person ("I", "my") or second-person ("you", "your").
+  e.g. "Senior backend engineer with 7 years of experience building financial APIs in
+  Python and Go, with deep expertise in PostgreSQL and AWS, based in Barcelona."
+  This field is used for semantic embedding — make it information-dense, not generic.
 """
 
 JD_SYSTEM_PROMPT = f"""

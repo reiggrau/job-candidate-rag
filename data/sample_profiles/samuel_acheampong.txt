@@ -1,0 +1,32 @@
+Samuel Acheampong
+Data Engineer | Accra, Ghana — open to remote
+
+5 years of experience building data infrastructure and ETL pipelines at scale.
+Currently a senior data engineer at a pan-African fintech company.
+
+Experience:
+
+  Zeepay (Accra) — Senior Data Engineer (Nov 2022 – present)
+    · Owns the end-to-end data platform: ingestion, transformation, and serving layers
+    · Built dbt transformation layer on top of BigQuery, replacing 200+ bespoke SQL scripts
+    · Designed Airflow DAGs for real-time and batch ingestion from 12 mobile money providers
+    · Implemented data quality checks with Great Expectations, reducing bad data incidents by 80%
+    · Collaborates with data scientists to productionise ML features via Vertex AI
+
+  Chipper Cash (Accra / remote) — Data Engineer (Jan 2020 – Oct 2022)
+    · Built Kafka-based streaming pipelines for transaction event processing
+    · Migrated legacy ETL (custom Python scripts) to Apache Spark on Dataproc
+    · Created internal analytics dashboards in Looker for the finance and compliance teams
+
+  MTN Ghana — Junior BI Analyst (Sep 2018 – Dec 2019)
+    · Built Excel and Power BI reports for network operations KPIs
+
+Skills:
+  Python, SQL, BigQuery, dbt, Airflow, Spark, Kafka, Looker, Great Expectations,
+  Vertex AI, GCP, Terraform, Docker, Git
+
+Education:
+  BSc Computer Science — University of Ghana, Legon (2014 – 2018)
+
+Languages: English (fluent), Twi (native)
+Open to remote: Yes (strong preference)

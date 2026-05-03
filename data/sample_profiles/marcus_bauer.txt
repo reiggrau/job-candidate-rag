@@ -1,0 +1,31 @@
+Marcus Bauer
+Senior Frontend Engineer | Berlin, Germany
+
+7 years of professional frontend development. Currently at a Berlin-based fintech
+startup, building the web app used by 300,000 retail investors.
+
+--- EXPERIENCE ---
+
+Tradelane GmbH — Senior Frontend Engineer (Mar 2022 – present)
+  · Leads a squad of 4 frontend engineers on the trading dashboard product
+  · Migrated legacy Angular codebase to React + TypeScript, reducing bundle size by 40%
+  · Designed and documented the internal component library (Storybook)
+  · Drives accessibility improvements across the product (WCAG 2.1 AA)
+
+Zalando SE — Frontend Developer (Jun 2019 – Feb 2022)
+  · Worked on the product listing and search experience (React, GraphQL)
+  · Implemented A/B experiments with significant GMV impact
+  · Contributed to Zalando's open-source design system Mosaic
+
+Freelance Web Developer (Sep 2017 – May 2019)
+  · Built and maintained websites for SMEs using HTML, CSS, JavaScript, and Vue.js
+
+--- SKILLS ---
+React, TypeScript, JavaScript, HTML, CSS, GraphQL, Next.js, Storybook, Webpack,
+Cypress, Jest, Figma, Git, Agile/Scrum
+
+--- EDUCATION ---
+B.Sc. Computer Science — Freie Universität Berlin, 2017
+
+Languages: German (native), English (fluent)
+Location: Berlin | Open to remote

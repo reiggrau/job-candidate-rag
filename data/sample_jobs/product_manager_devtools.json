@@ -1,0 +1,27 @@
+{
+	"title": "Product Manager — Developer Tools",
+	"company": "Codeloop",
+	"location": "Remote (global)",
+	"description": "Codeloop builds developer productivity tools used by 80,000 engineers worldwide. We're looking for a Product Manager with a strong technical background to own our IDE integrations and API product surface.",
+	"responsibilities": [
+		"Define and own the roadmap for Codeloop's extension ecosystem and public API",
+		"Work directly with engineering leads to scope, prioritise, and ship features",
+		"Talk to developers constantly — interviews, surveys, community forums, support tickets",
+		"Define success metrics and run structured experiments to validate bets",
+		"Write detailed specs, PRDs, and API documentation that engineers love"
+	],
+	"requirements": [
+		"4+ years in product management, at least 2 years on a developer-facing product",
+		"Hands-on coding background (can read and write code, understands APIs, SDKs, CLIs)",
+		"Experience shipping B2B SaaS products with API or platform components",
+		"Strong data skills: comfortable writing SQL, interpreting funnel analytics, A/B results",
+		"Excellent written communication — you write clearly and with precision"
+	],
+	"nice_to_have": [
+		"Experience with VS Code extensions, JetBrains plugins, or LSP",
+		"Open-source community experience"
+	],
+	"seniority": "Mid to Senior",
+	"sector": "Developer Tools / SaaS",
+	"remote": true
+}

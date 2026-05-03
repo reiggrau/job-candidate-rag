@@ -1,0 +1,24 @@
+Mobile Engineer — React Native
+Paymi | Madrid or Remote
+
+Paymi is a consumer fintech app with 2M users in Spain and Latin America.
+We're looking for a Mobile Engineer to join our 4-person mobile squad and
+help us ship high-quality iOS and Android experiences.
+
+What you'll work on:
+  · Build new features across iOS and Android using React Native
+  · Own the performance and crash-free rate of the Paymi app
+  · Integrate native modules when React Native's bridge isn't enough
+  · Collaborate with backend engineers on API design and with designers on interaction detail
+  · Set up and maintain mobile CI/CD with Fastlane and GitHub Actions
+
+What we look for:
+  · 3+ years of React Native in production (shipped apps on both stores)
+  · Comfortable writing native code in Swift or Kotlin when needed
+  · Experience with mobile state management (Redux, Zustand, or similar)
+  · Understanding of mobile performance profiling and memory management
+  · Spanish or English fluent (team is bilingual)
+
+Seniority: Mid to Senior
+Sector: FinTech / Consumer
+Remote: Yes

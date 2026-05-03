@@ -1,0 +1,26 @@
+Senior Product Designer
+Kerno | Barcelona (hybrid)
+
+Kerno is a B2B SaaS platform for operations and workforce management used by
+500+ companies across Southern Europe. Design is a core competitive advantage
+for us — we're looking for a Senior Product Designer to own complex workflows
+end-to-end.
+
+What you'll do:
+  · Lead the full design process from discovery to shipped feature: research, ideation,
+    wireframes, high-fidelity prototypes, and design QA
+  · Define and evolve the Kerno design system in close collaboration with frontend engineers
+  · Run qualitative and quantitative user research (interviews, usability tests, Hotjar)
+  · Partner with PMs to shape product direction before a single pixel is drawn
+  · Mentor one junior designer on the team
+
+What we need:
+  · 5+ years as a product/UX designer on complex B2B or SaaS products
+  · Expert-level Figma (components, auto-layout, variables)
+  · Experience owning a design system, not just consuming one
+  · Strong portfolio showing systems thinking, not just polished screens
+  · Fluent English and Spanish
+
+Seniority: Senior
+Sector: B2B SaaS / HRTech
+Remote: Hybrid (Barcelona)

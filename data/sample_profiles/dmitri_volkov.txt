@@ -1,0 +1,32 @@
+Dmitri Volkov
+DevOps / Platform Engineer | Warsaw, Poland
+
+8 years in infrastructure and platform engineering. Currently at a Warsaw-based
+insurtech company as a lead platform engineer, managing cloud infra for 50+ microservices.
+
+CAREER
+
+  Insurely (Warsaw) — Lead Platform Engineer (Sep 2021 – present)
+    · Owns AWS infrastructure across 3 environments (dev, staging, prod) with Terraform
+    · Manages EKS clusters (20+ nodes) and Helm chart ecosystem for 50+ microservices
+    · Built and maintains CI/CD pipelines with GitHub Actions and ArgoCD
+    · Implemented Prometheus + Grafana + Loki observability stack from scratch
+    · Leads incident response and runs quarterly chaos engineering exercises
+
+  OLX Group (Warsaw) — Senior DevOps Engineer (Mar 2018 – Aug 2021)
+    · Maintained AWS infrastructure for classified ads platforms across 5 markets
+    · Automated provisioning with Terraform and Ansible
+    · Reduced deployment frequency from weekly to multiple times per day
+
+  IT Administrator — Comarch SA (Jun 2016 – Feb 2018)
+    · On-premise Windows/Linux server administration and network monitoring
+
+TECH STACK
+AWS, Kubernetes, Helm, Terraform, Ansible, GitHub Actions, ArgoCD,
+Prometheus, Grafana, Loki, OpenTelemetry, Docker, Python, Bash, Go (scripting)
+
+EDUCATION
+B.Eng. Computer Networks — Warsaw University of Technology, 2016
+
+Languages: Polish (native), English (fluent), Russian (native)
+Open to remote: Yes (EU preferred)

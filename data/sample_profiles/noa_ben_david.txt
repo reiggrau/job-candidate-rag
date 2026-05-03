@@ -1,0 +1,33 @@
+Noa Ben-David
+QA / Test Automation Engineer | Tel Aviv, Israel
+
+6 years in software quality assurance, the last 3 focused on automation and
+shifting quality left in agile product teams. Currently at a cloud security startup.
+
+Work History:
+
+  Orca Security (Tel Aviv) — Senior QA Automation Engineer (Apr 2022 – present)
+    · Owns the end-to-end test automation framework (Playwright + Python)
+    · Builds API test suites with pytest covering 90%+ of REST endpoint contract coverage
+    · Participates in architecture reviews to give early quality input
+    · Runs weekly triage of flaky tests and maintains a sub-2% flakiness rate
+    · Contributes to shift-left QA culture: pairs with devs during feature development
+
+  IronSource (Tel Aviv) — QA Engineer (Jul 2019 – Mar 2022)
+    · Wrote Selenium-based automation for ad serving workflows
+    · Performed performance testing with k6 and JMeter on high-throughput APIs
+    · Coordinated regression cycles across iOS, Android, and web
+
+  ZIM Integrated Shipping (Haifa) — Manual QA Tester (Jun 2018 – Jun 2019)
+    · Manual testing of a B2B logistics web portal
+    · Wrote test plans and bug reports, tracked issues in Jira
+
+Skills:
+  Playwright, Selenium, pytest, Python, JavaScript, Postman, k6, JMeter,
+  REST API testing, CI/CD integration (GitHub Actions), Docker, SQL, Jira, TestRail
+
+Education:
+  B.Sc. Software Engineering — Technion, Haifa, 2018
+
+Languages: Hebrew (native), English (fluent)
+Open to remote: Yes (partial — prefers 2 days/week in office in Tel Aviv)

@@ -1,0 +1,30 @@
+Hannah Osei
+Senior Product Designer — Design Systems | London, UK
+
+8 years in product design with deep specialisation in design systems and
+enterprise UX. Currently Head of Design at a Series A RegTech startup in London.
+
+Experience:
+
+  Rulebook (London) — Head of Design (Feb 2023 – present)
+    · Built the design function from scratch: hired 2 designers, established processes
+    · Created and owns the Rulebook design system (150+ components in Figma, React implementation)
+    · Redesigned the core compliance workflow, reducing task completion time by 45%
+    · Partners with the CEO and CPO on product strategy and positioning
+
+  Monzo (London) — Senior Product Designer (Mar 2019 – Jan 2023)
+    · Worked on the business banking product (Monzo Business)
+    · Led the redesign of the payments and invoicing experience
+    · Co-owned Monzo's internal design system (Monzo DS)
+    · Ran 30+ usability studies and synthesised findings into product decisions
+
+  Freelance Designer (Oct 2016 – Feb 2019)
+    · Brand identity and digital design for London-based startups and agencies
+    · Clients included two pre-seed fintech apps and a media production company
+
+Education:
+  BA Graphic Design — Central Saint Martins, London, 2016
+
+Tools: Figma, Framer, Maze, Hotjar, Zeplin, Notion, Jira
+Languages: English (native), Twi (conversational)
+Location: London | Open to hybrid or remote

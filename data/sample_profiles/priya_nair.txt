@@ -1,0 +1,28 @@
+Priya Nair
+Backend Engineer (Node.js / Go) | Bangalore, India — open to remote
+
+6 years of experience building backend services for high-scale consumer products.
+Currently at a Series C edtech company as a mid-level backend engineer.
+
+Work History:
+  Learnly (Bangalore) — Backend Engineer (Aug 2022 – present)
+    · Builds and maintains microservices handling 5M+ student sessions per day
+    · Migrated core services from Node.js/Express to Go, reducing p99 latency by 35%
+    · Owns the real-time notification system (Kafka, Redis, WebSockets)
+    · Introduced contract testing with Pact across 12 services
+
+  Swiggy (Bangalore) — Junior Backend Engineer (Jul 2020 – Jul 2022)
+    · Worked on the restaurant onboarding API surface (Node.js, PostgreSQL)
+    · Wrote background jobs for order reconciliation and payout processing
+
+  Internship — Infosys (Jan 2020 – Jun 2020)
+    · Java Spring Boot services for internal HR tooling
+
+Technical skills: Go, Node.js, TypeScript, PostgreSQL, MongoDB, Redis, Kafka,
+Docker, Kubernetes, AWS (EC2, S3, SQS), Terraform, GitHub Actions
+
+Education:
+  B.Tech in Computer Science — NIT Calicut, 2020
+
+Languages: English (fluent), Hindi (native), Malayalam (native)
+Open to remote: Yes (prefers async / overlap with IST +/- 4h)

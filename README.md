@@ -1572,9 +1572,11 @@ curl -X POST http://localhost:8000/search \
 
 ### Qdrant
 
+Start Docker first, then:
+
 ```bash
 cd job-candidate-rag
-docker compose up qdrant # Start Docker first
+docker compose up qdrant
 ```
 
 ### Backend
@@ -1590,6 +1592,12 @@ uvicorn main:app --reload
 ```bash
 cd job-candidate-rag/frontend
 npm run dev
+```
+
+### Re-ingest a single file
+
+```bash
+cd job-candidate-rag/backend && source .venv/Scripts/activate && python ingestion.py
 ```
 
 ---

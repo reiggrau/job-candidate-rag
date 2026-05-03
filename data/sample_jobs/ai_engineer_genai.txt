@@ -1,0 +1,24 @@
+AI Engineer — Generative AI Products
+NovaMind AI | London or Remote
+
+NovaMind builds enterprise AI assistants for knowledge-intensive industries.
+We're looking for an AI Engineer to join our product engineering team and
+own the LLM-powered features that sit at the core of our product.
+
+You will:
+  · Design and implement RAG pipelines, prompt engineering strategies, and agent workflows
+  · Integrate LLM APIs (OpenAI, Anthropic, Gemini) into production backend services
+  · Work with vector databases (Pinecone, Qdrant, Weaviate) for semantic retrieval
+  · Evaluate model outputs, build evals frameworks, and iterate on quality
+  · Collaborate with ML researchers to bring experimental features to production
+
+You have:
+  · 3+ years of software engineering experience, including 1+ year working with LLMs in production
+  · Strong Python skills (FastAPI or similar)
+  · Hands-on experience with RAG, fine-tuning, or agent frameworks (LangChain, LlamaIndex)
+  · Ability to reason about latency, cost, and quality trade-offs in LLM systems
+  · Excellent written English for async-first remote collaboration
+
+Seniority: Mid to Senior
+Sector: AI / Enterprise SaaS
+Remote: Yes

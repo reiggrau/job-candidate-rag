@@ -1,0 +1,24 @@
+Senior Frontend Engineer — Consumer Product
+Shopwire | Amsterdam (hybrid) or Remote (EU)
+
+We're a fast-growing e-commerce platform with 4M+ monthly active users.
+Our frontend team owns the full customer-facing experience, from search
+and discovery to checkout and post-purchase flows.
+
+What you'll be doing:
+  · Lead the development of new product features in React and TypeScript
+  · Define frontend architecture standards across a team of 8 engineers
+  · Drive performance optimisation: Core Web Vitals, bundle size, lazy loading
+  · Collaborate closely with product and design on interaction patterns
+  · Mentor junior and mid-level engineers through code review and pairing
+
+What we're looking for:
+  · 5+ years of professional frontend experience, 3+ with React
+  · Strong TypeScript skills and experience designing component libraries
+  · Deep understanding of browser rendering, CSS, and accessibility (WCAG 2.1)
+  · Experience with testing (Jest, Cypress or Playwright)
+  · Bonus: Next.js, GraphQL, Nx monorepo
+
+Seniority: Senior
+Sector: E-commerce
+Remote: Yes (EU timezone)

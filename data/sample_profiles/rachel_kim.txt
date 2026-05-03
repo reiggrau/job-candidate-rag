@@ -1,0 +1,30 @@
+Rachel Kim
+Senior Product Manager — B2B SaaS | San Francisco, CA (open to remote)
+
+10 years in tech, 6 as a PM. Currently at a Series B HR-tech startup in SF as
+a Senior PM owning the core analytics and reporting product surface.
+
+EXPERIENCE
+
+  PeopleOS — Senior Product Manager (Jan 2022 – present, San Francisco)
+    · Owns the analytics product used by 1,200 HR teams; grew weekly active usage by 3x
+    · Reduced time-to-insight from 40 min to under 5 min through a self-serve dashboard redesign
+    · Leads a cross-functional squad of 6 (2 engineers, 1 designer, 1 data analyst)
+    · Partners with sales on enterprise deals as the product SME
+
+  Asana — Product Manager (Aug 2019 – Dec 2021, San Francisco)
+    · PM on the integrations team (Slack, Google Workspace, Salesforce)
+    · Shipped 4 major integration launches and grew integration DAU by 60%
+    · Wrote API documentation and worked closely with developer partners
+
+  Salesforce — Associate Product Manager (rotational) (Jul 2017 – Jul 2019)
+    · 2-year APM programme across CRM, analytics, and platform teams
+
+  Stanford University — B.S. Computer Science, 2017
+
+SKILLS
+  SQL, Amplitude, Mixpanel, Figma (reading designs), Jira, Linear,
+  Confluence, PRD writing, user interviews, A/B testing, OKR frameworks
+
+Languages: English (native), Korean (conversational)
+Open to remote: Yes

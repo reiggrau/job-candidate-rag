@@ -1,0 +1,27 @@
+Data Scientist — Recommendations & Personalisation
+Streamio | Stockholm or Remote
+
+We're building the next generation of content discovery. Our data science
+team trains and deploys the models that decide what 10 million users watch next.
+
+Responsibilities:
+  · Build and iterate on collaborative filtering and content-based recommendation models
+  · Design A/B experiments and analyse results with rigorous statistical methods
+  · Work closely with data engineers to productionise models via MLflow and Airflow
+  · Communicate findings and trade-offs clearly to non-technical stakeholders
+
+Requirements:
+  · 4+ years in a data science or applied ML role
+  · Strong Python skills: pandas, scikit-learn, PyTorch or TensorFlow
+  · Experience with recommendation systems or ranking models
+  · Solid statistics fundamentals (Bayesian inference, hypothesis testing)
+  · Familiarity with SQL and working in a data warehouse environment (BigQuery, Snowflake)
+  · Fluent English required
+
+Nice to have:
+  · Experience with real-time feature serving
+  · Publications or open-source contributions in ML
+
+Seniority: Mid to Senior
+Sector: Media / Streaming
+Remote: Yes

@@ -1,0 +1,52 @@
+{
+	"name": "Léa Rousseau",
+	"location": "Paris, France",
+	"title": "Data Scientist — NLP & Recommender Systems",
+	"open_to_remote": true,
+	"summary": "Doctorante en machine learning reconvertie en data scientist appliquée. Actuellement chez un éditeur de presse numérique parisien, je travaille sur les systèmes de recommandation et la personnalisation de contenu.",
+	"experience": [
+		{
+			"company": "Le Monde Numérique",
+			"role": "Data Scientist",
+			"period": "2023 – present",
+			"details": [
+				"Built and A/B tested a content recommendation engine (collaborative filtering + NLP embeddings) that increased article engagement by 22%",
+				"Productionised models via MLflow and a FastAPI inference service on GCP",
+				"Runs weekly experiment readouts for the editorial and product teams"
+			]
+		},
+		{
+			"company": "Criteo",
+			"role": "Data Scientist (internship then full-time)",
+			"period": "2021 – 2023",
+			"details": [
+				"Worked on CTR prediction models for programmatic advertising (XGBoost, LightGBM)",
+				"Contributed to internal feature store tooling in Python"
+			]
+		},
+		{
+			"company": "INRIA Paris",
+			"role": "PhD student (unfinished — left after 1.5 years to join industry)",
+			"period": "2020 – 2021",
+			"details": [
+				"Research topic: graph neural networks for drug interaction prediction"
+			]
+		}
+	],
+	"skills": [
+		"Python",
+		"scikit-learn",
+		"PyTorch",
+		"pandas",
+		"SQL",
+		"BigQuery",
+		"MLflow",
+		"FastAPI",
+		"GCP",
+		"Spark",
+		"Airflow",
+		"Tableau"
+	],
+	"education": "Master's in Machine Learning — ENS Paris-Saclay, 2020",
+	"languages": ["French (native)", "English (fluent)"]
+}

@@ -1,0 +1,58 @@
+{
+	"name": "Yuki Tanaka",
+	"location": "Tokyo, Japan",
+	"title": "Lead Software Engineer / Engineering Manager",
+	"open_to_remote": true,
+	"bio": "Engineering manager with 12 years of experience across backend engineering and technical leadership. Currently managing a team of 9 engineers at a Tokyo-based SaaS company building supply chain software.",
+	"experience": [
+		{
+			"company": "Logify Japan",
+			"role": "Engineering Manager",
+			"period": "2021 – present",
+			"reports": 9,
+			"details": [
+				"Manages two squads (platform and integrations) across Japan and remote hires",
+				"Drove rewrite of core import/export pipeline from Rails monolith to Go microservices, improving throughput 8x",
+				"Introduced structured engineering levels and a technical career ladder",
+				"Runs bi-weekly 1:1s, quarterly performance reviews, and hiring (screened 80+ candidates)"
+			]
+		},
+		{
+			"company": "Mercari",
+			"role": "Senior Backend Engineer",
+			"period": "2017 – 2021",
+			"details": [
+				"Backend for the seller tools and logistics tracking surfaces (Go, gRPC, Spanner)",
+				"On-call rotation for critical payment and shipping services",
+				"Mentored 4 junior engineers who have since reached senior level"
+			]
+		},
+		{
+			"company": "Rakuten",
+			"role": "Backend Engineer",
+			"period": "2012 – 2017",
+			"details": [
+				"Java Spring Boot services for the marketplace search and ranking team",
+				"Led integration of Elasticsearch for product catalogue search"
+			]
+		}
+	],
+	"skills": [
+		"Go",
+		"Java",
+		"Python",
+		"Kubernetes",
+		"gRPC",
+		"PostgreSQL",
+		"Spanner",
+		"Elasticsearch",
+		"Terraform",
+		"AWS",
+		"GitHub Actions",
+		"OKRs",
+		"hiring",
+		"technical leadership"
+	],
+	"education": "B.Eng. Information Engineering — Keio University, 2012",
+	"languages": ["Japanese (native)", "English (fluent)"]
+}

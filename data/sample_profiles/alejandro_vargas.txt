@@ -1,0 +1,27 @@
+Nombre: Alejandro Vargas Mora
+Ubicación: Ciudad de México, México
+Título: Desarrollador Backend Junior (Python)
+Disponible para trabajo remoto: Sí
+
+Sobre mí:
+Soy ingeniero de sistemas recién egresado con 8 meses de experiencia laboral
+en una startup de tecnología en CDMX. Me apasiona el desarrollo backend y
+actualmente estoy aprendiendo buenas prácticas de arquitectura de APIs.
+
+Experiencia:
+
+  Klar (CDMX) — Desarrollador Backend Junior (Sep 2024 – presente)
+    · Desarrollo y mantenimiento de endpoints REST con FastAPI y PostgreSQL
+    · Colaboro con el equipo de producto en la integración de Stripe para pagos
+    · Escribo pruebas unitarias con pytest para los servicios que desarrollo
+    · Participé en la migración de una base de datos de Heroku Postgres a AWS RDS
+
+Proyectos personales:
+  · API de gestión de tareas con FastAPI, SQLAlchemy y autenticación JWT (GitHub)
+  · Bot de Telegram para recordatorios de gastos personales (Python, SQLite)
+
+Educación:
+  Ingeniería en Sistemas Computacionales — Instituto Politécnico Nacional, 2024
+
+Habilidades: Python, FastAPI, PostgreSQL, SQLAlchemy, pytest, Docker, Git, REST APIs
+Idiomas: Español (nativo), Inglés (B2 intermedio-alto)

@@ -1,0 +1,27 @@
+Platform / DevOps Engineer — Cloud Infrastructure
+Vesper Systems | Berlin (hybrid) or Remote (EU)
+
+Vesper is a Series B logistics intelligence company. Our platform processes
+real-time freight data from thousands of carriers. We're looking for a
+Platform Engineer to own the reliability, scalability, and security of our
+cloud infrastructure.
+
+Responsibilities:
+  · Design and maintain cloud infrastructure on AWS (EKS, RDS, S3, Lambda)
+  · Build and maintain CI/CD pipelines with GitHub Actions and ArgoCD
+  · Own Kubernetes cluster operations: upgrades, scaling, resource management
+  · Implement observability stack (Prometheus, Grafana, OpenTelemetry)
+  · Drive infrastructure-as-code practices using Terraform
+  · Participate in on-call rotation and lead incident post-mortems
+
+Requirements:
+  · 4+ years in a DevOps, SRE, or platform engineering role
+  · Deep AWS knowledge (certifications a plus but not required)
+  · Production experience with Kubernetes
+  · Strong Terraform and IaC mindset
+  · Proficiency in Python or Go for tooling and automation
+  · Fluent English
+
+Seniority: Senior
+Sector: Logistics / B2B SaaS
+Remote: Yes (EU)

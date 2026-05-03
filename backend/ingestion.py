@@ -137,6 +137,37 @@ def upsert_job(profile: NormalizedProfile, job_id: str) -> None:
     )
 
 
+def ingest_one(path: Path, kind: str) -> None:
+    """Ingest a single file as a candidate profile or job description."""
+    ensure_collection()
+    print(f"Ingesting {path.name} as {kind}...")
+    raw_text = load_raw_text(path)
+    if kind == "candidate":
+        profile = normalize_profile(raw_text)
+        doc_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, path.name))
+        upsert_profile(profile, doc_id)
+    else:
+        profile = normalize_job_description(raw_text)
+        doc_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, path.name))
+        upsert_job(profile, doc_id)
+    print(f"\n{'─' * 50}")
+    print(f"  ✓ Ingested as {kind.upper()}  |  ID: {doc_id}")
+    print(f"{'─' * 50}")
+    print(f"  Name            {profile.name}")
+    print(f"  Role            {profile.role}")
+    print(f"  Seniority       {profile.seniority}")
+    print(f"  Experience      {profile.years_experience} years")
+    print(
+        f"  Location        {profile.location}  (remote: {profile.open_to_remote})")
+    print(f"  Languages       {', '.join(profile.languages) or '—'}")
+    print(f"  Sector          {', '.join(profile.sector) or '—'}")
+    print(f"  Hard skills     {', '.join(profile.hard_skills) or '—'}")
+    print(f"  Soft skills     {', '.join(profile.soft_skills) or '—'}")
+    print(f"  Education       {profile.education or '—'}")
+    print(f"  Summary         {profile.summary}")
+    print(f"{'─' * 50}\n")
+
+
 def ingest_all() -> None:
     """Ingest all profiles and job descriptions from the data directory."""
     ensure_collection()
@@ -160,3 +191,36 @@ def ingest_all() -> None:
         upsert_job(profile, job_id)
         print(
             f"  ✓ {profile.name or path.stem} — {profile.seniority} {profile.role}")
+
+
+if __name__ == "__main__":
+    import sys
+
+    search_dirs = {"candidate": PROFILES_DIR, "job": JOBS_DIR}
+
+    print("Ingest files into Qdrant.")
+    print("Kind options: candidate, job, all")
+    kind = input("Kind [all]: ").strip().lower() or "all"
+
+    if kind == "all":
+        ingest_all()
+        sys.exit(0)
+
+    if kind not in search_dirs:
+        print(f"Invalid kind '{kind}'. Must be 'candidate', 'job', or 'all'.")
+        sys.exit(1)
+
+    base_dir = search_dirs[kind]
+    available = sorted(p.name for p in base_dir.iterdir()
+                       if p.suffix in {".txt", ".json", ".pdf"})
+    print(f"\nAvailable files in {base_dir}:")
+    for name in available:
+        print(f"  {name}")
+
+    filename = input("\nFilename: ").strip()
+    path = base_dir / filename
+    if not path.exists():
+        print(f"File not found: {path}")
+        sys.exit(1)
+
+    ingest_one(path, kind)

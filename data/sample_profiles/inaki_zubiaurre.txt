@@ -1,0 +1,26 @@
+Nombre: Iñaki Zubiaurre
+Ubicación: Bilbao, España
+Título: Diseñador UX/UI Junior
+Disponible para remoto: Sí
+
+Sobre mí:
+Soy diseñador de interfaces con 1 año y medio de experiencia profesional. Me formé
+en diseño gráfico y luego completé un bootcamp especializado en UX/UI. Trabajo
+actualmente en una agencia digital en Bilbao haciendo diseño de producto para clientes
+del sector retail y turismo.
+
+Experiencia:
+
+  Estudio Kode (Bilbao) — Diseñador UX/UI (Ene 2024 – actualidad)
+    · Diseño de wireframes y prototipos en Figma para proyectos de clientes
+    · Realización de entrevistas a usuarios y síntesis de hallazgos (affinity maps)
+    · Mantenimiento del sistema de diseño interno de la agencia
+
+  Freelance (Jun 2023 – Dic 2023)
+    · Diseño de identidades visuales y landing pages para 4 emprendedores locales
+
+  Grado en Diseño Gráfico — Universidad del País Vasco, 2023
+  Bootcamp UX/UI — The Bridge, Bilbao, 2023 (6 meses)
+
+Herramientas: Figma, Adobe Illustrator, Photoshop, Maze, Notion, Zeplin
+Idiomas: Euskera (nativo), Español (nativo), Inglés (intermedio B2)

@@ -1,0 +1,28 @@
+Chiara Ferretti
+Mobile Developer — React Native & iOS | Milan, Italy
+
+5 years of mobile development experience across iOS native and React Native.
+Passionate about animation, micro-interactions, and highly polished mobile UX.
+
+ESPERIENZA LAVORATIVA
+
+  Musixmatch (Bologna / remote) — Mobile Developer (Mar 2022 – present)
+    · Leads development of new features in the React Native codebase (4M+ users)
+    · Owns the lyrics sync and karaoke animation engine (native module in Swift)
+    · Reduced app launch time by 30% through profiling and lazy module loading
+    · Mentors two junior developers on the mobile team
+
+  Bending Spoons (Milan) — iOS Developer (Sep 2019 – Feb 2022)
+    · Worked on 3 top-100 iOS apps using Swift and UIKit/SwiftUI
+    · Implemented complex animation sequences and custom UIKit components
+    · Ran A/B tests on paywall designs that improved subscription conversion by 15%
+
+COMPETENZE TECNICHE
+React Native, Swift, SwiftUI, UIKit, Kotlin (basic), TypeScript, JavaScript,
+Redux, Reanimated 2, Fastlane, Xcode, Android Studio, Figma
+
+FORMAZIONE
+Laurea Triennale in Informatica — Politecnico di Milano, 2019
+
+Lingue: Italiano (madrelingua), Inglese (fluente), Spagnolo (base)
+Disponibilità remoto: Sì (preferibilmente EU)

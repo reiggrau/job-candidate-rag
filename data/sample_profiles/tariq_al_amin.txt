@@ -1,0 +1,29 @@
+Tariq Al-Amin
+AI / LLM Engineer | Dubai, UAE — remote preferred
+
+Background:
+4 years in software engineering, the last 2 focused entirely on LLM-based products.
+Currently building AI assistants for enterprise clients at a boutique AI consultancy.
+
+Experience:
+
+  IntelliLayer (Dubai) — AI Engineer (Feb 2023 – present)
+    · Designed and shipped 3 RAG-based enterprise assistants using LangChain, OpenAI APIs,
+      and Pinecone, deployed on Azure
+    · Built evaluation frameworks using RAGAS to measure retrieval precision and answer quality
+    · Led a fine-tuning project on Llama 3 for a legal document classification client
+    · Worked directly with clients to gather requirements and demo solutions
+
+  Careem (Dubai) — Backend Engineer (Jul 2021 – Jan 2023)
+    · Built microservices for driver onboarding and document verification (Python, FastAPI, PostgreSQL)
+    · Introduced async task processing with Celery and Redis
+
+Skills:
+  Python, FastAPI, LangChain, LlamaIndex, OpenAI API, Anthropic API, Pinecone, Qdrant,
+  Azure OpenAI, RAGAS, PyTorch (inference), PostgreSQL, Redis, Docker, Git
+
+Education:
+  B.Eng. Software Engineering — American University of Sharjah, 2021
+
+Languages: Arabic (native), English (fluent)
+Open to remote: Yes (strongly preferred)

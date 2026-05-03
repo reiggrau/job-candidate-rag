@@ -1,0 +1,34 @@
+Viktor Horak
+Solutions Architect / Staff Engineer | Prague, Czech Republic
+
+15 years in software engineering, the last 5 in solutions architecture and
+technical pre-sales for a cloud consulting firm. Before that, 10 years as
+a hands-on backend and distributed systems engineer.
+
+EXPERIENCE
+
+  CloudEdge Consulting (Prague) — Solutions Architect (Jan 2020 – present)
+    · Designs cloud architecture proposals for enterprise clients migrating to AWS and Azure
+    · Leads technical due diligence for 3–4 client engagements per quarter
+    · Builds proof-of-concept implementations in Python, Go, and Terraform
+    · Presents architecture decisions to CTO/CIO stakeholders at Fortune 500 clients
+    · AWS Certified Solutions Architect – Professional
+
+  Avast (Prague) — Staff Engineer (Aug 2014 – Dec 2019)
+    · Technical lead for the backend threat intelligence pipeline (Python, Go, Kafka, Cassandra)
+    · Designed the migration of 4PB data store from on-premise to AWS
+    · Mentored 6 engineers across two teams
+
+  Skype / Microsoft (Prague) — Senior Software Engineer (Jun 2009 – Jul 2014)
+    · Backend services for Skype's signalling infrastructure (C++, Python)
+    · Worked on distributed consensus and state synchronisation problems
+
+SKILLS
+Python, Go, AWS, Azure, Terraform, Kafka, Cassandra, PostgreSQL, Kubernetes,
+System design, Technical writing, Pre-sales, Architecture review boards
+
+EDUCATION
+Ing. (MSc) Computer Science — Czech Technical University in Prague, 2009
+
+Languages: Czech (native), English (fluent), German (intermediate)
+Open to remote: Yes

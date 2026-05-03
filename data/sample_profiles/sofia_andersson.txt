@@ -1,0 +1,22 @@
+Sofia Andersson
+Junior Frontend Developer | Gothenburg, Sweden
+
+About me:
+I graduated 8 months ago from a frontend bootcamp at Hyper Island and have been
+working since then as a junior developer at a small digital agency in Gothenburg.
+I build websites and landing pages for clients using HTML, CSS, JavaScript, and React.
+
+Experience:
+  Pixel & Co — Junior Frontend Developer (Jan 2025 – present)
+    · Built 6 client websites using React and Tailwind CSS
+    · Maintained and updated WordPress sites for 10+ clients
+    · Collaborated with a senior developer on a React Native project
+
+  Hyper Island — Intensive Frontend Programme (Jun 2024 – Dec 2024)
+    · Built projects with React, JavaScript, Node.js, and REST APIs
+    · Final project: a full-stack task management app with authentication
+
+Skills: HTML, CSS, JavaScript, React, Tailwind CSS, Git, Node.js, Figma (basic)
+Languages: Swedish (native), English (fluent)
+Education: Hyper Island Frontend Developer Programme, 2024
+Open to remote: Yes

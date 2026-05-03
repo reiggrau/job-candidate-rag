@@ -1,0 +1,31 @@
+Amara Diallo
+Full Stack Developer | Dakar, Senegal — remote
+
+3 years of full-stack development experience. Self-taught, then completed a 6-month
+mentorship programme with a Paris-based remote developer. Now working full-time
+as a remote contractor for European startups.
+
+EXPERIENCE
+
+  Remote contractor — various clients (Jan 2024 – present)
+    · Built a Vue 3 + Django REST API SaaS MVP for a French HR startup (solo developer)
+    · Contributed to a React + Node.js e-commerce backend for a Belgian retailer
+    · Delivered a Svelte-based dashboard for an IoT monitoring client in Germany
+
+  Freelance developer (Aug 2022 – Dec 2023)
+    · Built websites and small web apps for local Senegalese NGOs and businesses
+    · Stack: HTML, CSS, JavaScript, PHP, WordPress
+
+  Mentorship programme — Le Wagon Alumni Network (Oct 2021 – Jul 2022)
+    · 6-month mentored apprenticeship covering React, Node.js, PostgreSQL, Docker
+
+SKILLS
+React, Vue.js, Svelte, TypeScript, Node.js, Django, Python, PostgreSQL,
+MongoDB, Docker, Git, REST APIs, Tailwind CSS
+
+EDUCATION
+Le Wagon Dakar — Web Development Bootcamp (Jul 2021 – Sep 2021)
+Université Cheikh Anta Diop — Licence en Informatique (2018 – 2021)
+
+Languages: French (native), Wolof (native), English (professional)
+Open to remote: Yes (available full-time, UTC+0)
