@@ -8,6 +8,7 @@
 	--text-h: #272727;
 	--bg: #fff;
 	--bg-highlight: #f4f3ec;
+	--bg-highlight-hover: #e5e4e7;
 	--border: #e5e4e7;
 	--code-bg: #f4f3ec;
 	--accent: #0081b4;
@@ -52,6 +53,7 @@
 	--text-h: #f3f4f6;
 	--bg: #16171d;
 	--bg-highlight: #1f2028;
+	--bg-highlight-hover: #2e303a;
 	--border: #2e303a;
 	--code-bg: #1f2028;
 	--accent: #0081b4;
@@ -142,6 +144,12 @@ button {
 		color: var(--accent);
 		border-color: var(--accent-border);
 		background: var(--accent-bg);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		pointer-events: none;
 	}
 
 	.button-icon {

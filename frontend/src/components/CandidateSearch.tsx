@@ -1,15 +1,17 @@
 import { useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import type { Profile } from '../types';
-import { Slide } from '@mui/material';
 
 interface CandidateSearchProps {
+	setIsQuickAccessOpen: Dispatch<SetStateAction<boolean>>;
 	selectedItem: Profile | null;
-	setSelectedItem: (item: Profile | null) => void;
+	setSelectedItem: Dispatch<SetStateAction<Profile | null>>;
 	handleSearch: (description: string) => Promise<void>;
 }
 
 export default function CandidateSearch(props: CandidateSearchProps) {
-	const { selectedItem, setSelectedItem, handleSearch } = props;
+	const { setIsQuickAccessOpen, selectedItem, setSelectedItem, handleSearch } =
+		props;
 
 	const [description, setDescription] = useState(
 		selectedItem ? selectedItem.summary : '',
@@ -17,10 +19,10 @@ export default function CandidateSearch(props: CandidateSearchProps) {
 
 	const [loading, setLoading] = useState(false);
 
-	const [error, setError] = useState<string | null>(null);
+	// const [error, setError] = useState<string | null>(null);
 
 	return (
-		<div id="SearchForm" className="w-full h-full flex justify-center">
+		<div id="SearchForm" className="h-full flex-grow flex justify-center">
 			<form
 				onSubmit={async (e) => {
 					e.preventDefault();
@@ -42,10 +44,30 @@ export default function CandidateSearch(props: CandidateSearchProps) {
 					onChange={(e) => setDescription(e.target.value)}
 					minLength={200}
 				/>
-				<h6 className="relative -top-6 -right-55 h-0">
-					{description.length} / 200
-				</h6>
-				<h5 className="!text-[var(--error)] h-5">{error}</h5>
+				<div className="relative h-0 -top-2 w-full max-w-[500px] px-3 flex flex-row-reverse justify-between items-end">
+					<h6>{description.length} / 200</h6>
+					<div className="flex gap-3">
+						<button
+							type="button"
+							className="!bg-gray-700 w-24 justify-center !w-16"
+							onClick={() => {
+								setSelectedItem(null);
+								setDescription('');
+							}}
+							disabled={!description.length}
+						>
+							Clear
+						</button>
+						{/* <button
+							type="button"
+							className="!bg-gray-700 w-24 justify-center !w-16"
+							disabled={description.length < 200}
+						>
+							Save
+						</button> */}
+					</div>
+				</div>
+				<h5 className="!text-[var(--error)] h-5"></h5>
 				<button
 					className={`${loading ? '!bg-gray-500' : '!bg-[var(--main-button-color)]'} cursor-pointer !px-8 !py-4 !rounded-xl shadow`}
 					disabled={loading || description.trim().length < 200}
@@ -56,19 +78,13 @@ export default function CandidateSearch(props: CandidateSearchProps) {
 				</button>
 				<h5>
 					or choose from the{' '}
-					<span className="underline cursor-pointer hover:text-[var(--accent)]">
+					<span
+						className="underline cursor-pointer hover:text-[var(--accent)]"
+						onClick={() => setIsQuickAccessOpen((prev) => !prev)}
+					>
 						available jobs
 					</span>
 				</h5>
-				{/* <div className="flex gap-2 justify-end">
-					<button
-						type="button"
-						className="!bg-gray-700 w-24 justify-center"
-						onClick={() => setSelectedItem(null)}
-					>
-						Clear
-					</button>
-				</div> */}
 			</form>
 		</div>
 	);

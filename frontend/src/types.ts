@@ -1,15 +1,18 @@
 export type SearchMode = 'Jobs' | 'Candidates';
 
 export interface Profile {
-	id: string;
-	name?: string | null;
+	name: string;
+	summary: string;
 	role: string;
 	seniority: string;
 	years_experience: number;
+	sector: string[];
+	hard_skills: string[];
+	soft_skills: string[];
+	languages: string[];
 	location: string;
 	open_to_remote: boolean;
-	hard_skills: string[];
-	summary: string;
+	education?: string | null;
 }
 
 export interface MatchResult extends Profile {

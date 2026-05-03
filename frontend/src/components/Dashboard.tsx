@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { getCandidates, getJobs, search } from '../api';
 import type { MatchResult, Profile, SearchMode } from '../types';
 import Header from './Header';
+import QuickAccess from './QuickAccess';
 import CandidateSearch from './CandidateSearch';
+import Results from './Results';
 import Footer from './Footer';
 
 export default function Dashboard() {
@@ -12,9 +14,11 @@ export default function Dashboard() {
 	const [searchMode, setSearchMode] = useState<SearchMode>('Candidates');
 	const [isFetching, setIsFetching] = useState(true);
 
+	const [isQuickAccessOpen, setIsQuickAccessOpen] = useState(false);
 	const [selectedItem, setSelectedItem] = useState<Profile | null>(null);
 
 	const [results, setResults] = useState<MatchResult[]>([]);
+	const [isResultsOpen, setIsResultsOpen] = useState(true);
 	const [selectedResult, setSelectedResult] = useState<MatchResult | null>(
 		null,
 	);
@@ -29,6 +33,7 @@ export default function Dashboard() {
 			console.log('Search results:', results);
 			setResults(results);
 			setSelectedResult(results[0] || null);
+			setIsResultsOpen(true);
 		} catch (error) {
 			console.error('Error during search:', error);
 		}
@@ -59,25 +64,32 @@ export default function Dashboard() {
 	return (
 		<div id="Dashboard" className="h-full">
 			<Header searchMode={searchMode} setSearchMode={setSearchMode} />
-			{/* <QuickAccess
-					isFetching={isFetching}
+			<main className="h-full w-full pt-[var(--header-height)] flex justify-between">
+				<QuickAccess
 					items={searchMode === 'Jobs' ? candidates : jobs}
+					searchMode={searchMode}
+					isFetching={isFetching}
+					isQuickAccessOpen={isQuickAccessOpen}
+					setIsQuickAccessOpen={setIsQuickAccessOpen}
 					selectedItem={selectedItem}
 					setSelectedItem={setSelectedItem}
-				/> */}
-			<main className="h-full w-full pt-[var(--header-height)] pb-[var(--footer-height)]">
+				/>
 				<CandidateSearch
+					setIsQuickAccessOpen={setIsQuickAccessOpen}
 					key={selectedItem?.id ?? 'none'}
 					selectedItem={selectedItem}
 					setSelectedItem={setSelectedItem}
 					handleSearch={searchMatches}
 				/>
-			</main>
-			{/* <ResultsList
-					title="Search Results"
+				<Results
 					results={results}
+					searchMode={searchMode}
+					isResultsOpen={isResultsOpen}
+					setIsResultsOpen={setIsResultsOpen}
+					selectedResult={selectedResult}
 					setSelectedResult={setSelectedResult}
-				/> */}
+				/>
+			</main>
 			<Footer />
 		</div>
 	);

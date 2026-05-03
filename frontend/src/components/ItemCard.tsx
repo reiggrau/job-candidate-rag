@@ -13,8 +13,8 @@ export default function ItemCard(props: ItemCardProps) {
 	return (
 		<div
 			id="ItemCard"
-			className={`w-full flex flex-col px-3 py-2 border border-[var(--border)] rounded cursor-pointer hover:bg-gray-700 ${
-				selectedItem?.id === item.id ? 'bg-gray-800' : ''
+			className={`w-full flex flex-col px-3 py-2 border border-[var(--border)] rounded cursor-pointer bg-[var(--bg-highlight)] hover:bg-[var(--bg-highlight-hover)] ${
+				selectedItem?.id === item.id ? 'bg-[var(--bg-highlight-hover)]' : ''
 			}`}
 			onClick={() => onSelect(item)}
 		>
