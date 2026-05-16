@@ -25,7 +25,7 @@ export default function QuickAccess(props: QuickAccessProps) {
 	return (
 		<div
 			id="QuickAccess"
-			className={`relative w-[250px] ${isQuickAccessOpen ? 'left-0' : '-left-[250px]'} h-full flex-col gap-2 p-0 pl-2 border-r border-[var(--border)] transition-[left] duration-300 bg-[var(--bg-highlight)]`}
+			className={`relative w-[250px] ${isQuickAccessOpen ? 'left-0' : '-left-[250px]'} h-full flex-col gap-2 p-0 pl-2 border-r border-[var(--border)] transition-[left] duration-300 bg-[var(--bg-highlight)] z-10`}
 		>
 			<div className="h-full overflow-y-scroll flex flex-col gap-2 pt-2 pb-10">
 				<h3 className="!font-bold">

@@ -37,7 +37,7 @@ export default function ResultCard(props: ResultCardProps) {
 							: 'Unnamed Company'}
 				</h3>
 				<h5
-					className="shrink-0 pr-1 pl-1.5 pt-0.4 rounded !font-bold"
+					className="shrink-0 pr-1 pl-1.5 pt-0.4 rounded !font-bold !text-white"
 					style={{ backgroundColor: scoreBadgeColor(result.score) }}
 				>
 					{Math.round(result.score * 100)}%

@@ -48,7 +48,7 @@ export default function Results(props: ResultsProps) {
 			{/* Pull tab */}
 			<button
 				onClick={() => setIsResultsOpen(!isResultsOpen)}
-				className="absolute -left-7 top-1/2 -translate-y-1/2 w-7 !py-3 flex items-center justify-center bg-[var(--bg-highlight)] border !border-1 !border-r-0 !border-[var(--border)] !rounded-none !rounded-l-md cursor-pointer"
+				className="absolute -left-7 top-1/2 -translate-y-1/2 w-7 !py-3 flex items-center justify-center bg-[var(--bg-highlight)] border !border-1 !border-r-0 !border-[var(--border)] !rounded-none !rounded-l-md cursor-pointer z-10"
 				aria-label={isResultsOpen ? 'Close results' : 'Open results'}
 			>
 				<span

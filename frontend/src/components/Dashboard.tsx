@@ -53,6 +53,7 @@ export default function Dashboard() {
 					console.log('Fetched candidates:', candidates);
 					setCandidates(candidates);
 				}
+				setResults([]);
 			} catch (error) {
 				console.error('Error fetching data:', error);
 			}
@@ -75,6 +76,7 @@ export default function Dashboard() {
 					setSelectedItem={setSelectedItem}
 				/>
 				<CandidateSearch
+					searchMode={searchMode}
 					setIsQuickAccessOpen={setIsQuickAccessOpen}
 					key={selectedItem?.id ?? 'none'}
 					selectedItem={selectedItem}
