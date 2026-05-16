@@ -65,12 +65,15 @@
 		rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 }
 
+body {
+	background: var(--bg);
+}
+
 #root {
 	height: 100vh;
 	overflow: hidden;
 	box-sizing: border-box;
 	color: var(--text);
-	background: var(--bg);
 	letter-spacing: 0.18px;
 }
 
